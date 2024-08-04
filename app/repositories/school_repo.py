@@ -1,61 +1,61 @@
-import os
-import shutil
-from fastapi import File, UploadFile
-from app.config.db_config import mongodb
-from bson import ObjectId
+from bson import ObjectId,DBRef
 from app.models.school_model import School
+from app.config.db_config import mongodb
+from fastapi import HTTPException
+from app.dto.school_dto import SchoolResponseDTO
 
-path=UPLOAD_DIR = "uploads"
 
 class SchoolRepository:
-
     @staticmethod
-    async def create_school(school:School):
+    async def create_school(school: School):
         result = await mongodb.collections["school"].insert_one(school.dict())
         return {"inserted_id": str(result.inserted_id)}
 
-    # @staticmethod    
-    # async def create_school(school:school ,file: UploadFile = File(...)):
-    #     result= await mongodb.collections["school"].insert_one(school.dict())
-    #     file_location = f"{path}/{file.filename}"
-    #     os.makedirs(os.path.dirname(file_location), exist_ok=True)
-    #     with open(file_location, "wb") as buffer:
-    #         shutil.copyfileobj(file.file, buffer)
-    #     return result, {"info": f"file '{file.filename}' saved at '{file_location}'"}
+    @staticmethod
+    async def get_all_schools():
+        cursor = mongodb.collections["school"].find({})
+        schools = []
+        async for school in cursor:
+            school["_id"] = str(school["_id"].id) if isinstance(school["_id"], DBRef) else str(school["_id"])
+            schools.append(school)
+        return schools
+    
 
     @staticmethod
-    async def get_all_school():
-        cursor = mongodb.collections["school"].find({})
-        school = []
-        async for admin in cursor:
-            admin["_id"] = str(admin["_id"])
-            school.append(admin)
-        return school
-    
-    @staticmethod
-    async def read_school(school_id: str):
-        _id = ObjectId(school_id)
+    async def get_school(school_id: str) -> SchoolResponseDTO:
+        try:
+            _id = ObjectId(school_id)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Invalid school ID: {str(e)}")
+
         school = await mongodb.collections["school"].find_one({"_id": _id})
         if school:
             school["_id"] = str(school["_id"])
             return school
-        return {"error": "school ID not found"}
-        
+        raise HTTPException(status_code=404, detail="School not found")
+
     @staticmethod
-    async def delete_school(mentor_id:str):
-        _id=ObjectId(mentor_id)
-        result=await mongodb.collections["school"].delete_one({"_id":_id})
-        if result:
-            return "mentor deleted sucessfully from database"
+    async def delete_school(school_id: str):
+        try:
+            _id = ObjectId(school_id)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Invalid school ID: {str(e)}")
+
+        result = await mongodb.collections["school"].delete_one({"_id": _id})
+        if result.deleted_count > 0:
+            return "School deleted successfully"
         else:
-            return "Error while deleting"
-        
+            raise HTTPException(status_code=404, detail="School not found")
+
     @staticmethod
-    async def update_school(mentor_id: str, school: School):
-        _id=ObjectId(mentor_id)
-        result=await mongodb.collections["school"].update_one({"_id":_id},{"$set":school.dict()})
-        if result.modified_count>0:
-            return "mentor updated sucessfully"
+    async def update_school(school_id: str, school: School):
+        try:
+            _id = ObjectId(school_id)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Invalid school ID: {str(e)}")
+
+        result = await mongodb.collections["school"].update_one({"_id": _id}, {"$set": school.dict()})
+        if result.matched_count > 0:
+            return "School updated successfully"
         else:
-            return "error updating mentor"
-        
+            raise HTTPException(status_code=404, detail="School not found or no changes made")

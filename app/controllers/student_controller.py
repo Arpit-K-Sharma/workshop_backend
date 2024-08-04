@@ -1,28 +1,54 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
+from app.dto.student_dto import StudentDTO
+from app.service.student_service import StudentService
 from app.models.student_model import Student
-from app.service.student_service import studentService
+from app.config.logger_config import get_logger
+from app.utils.response_util import get_response
+
+logger = get_logger()
 
 student_route = APIRouter()
 
-student_route.get("/student")
-async def list_students(student:Student):
-    response = await studentService.list_student(student)
-    return response
+@student_route.get("/student/{student_id}")
+async def get_student_by_id(student_id: str):
+    logger.info(f"ENDPOINT CALLED:/STUDENT/(GET)\n DATA DELETED")
+    response = await StudentService.get_student_by_id(student_id)
+    logger.info(f"RESPONSE SENT:{response}")
+    return get_response(status="success",status_code=200,data=response)
+
+@student_route.get("/student/school/{school_id}")
+async def get_students_by_school_id(school_id: str):
+    logger.info(f"ENDPOINT CALLED:/STUDENT/(GET)\n DATA TAKEN")
+    response = await StudentService.get_students_by_school_id(school_id)
+    logger.info(f"RESPONSE SENT:{response}")
+    return get_response(status="success",status_code=200,data=response)
+
+
 @student_route.get("/student")
-async def read_student():
-    response =await studentService.read_student()  
-    return response
-    
+async def get_all_Students():
+    logger.info(f"ENDPOINT CALLED:/STUDENT/(GET)\n DATA TAKEN")
+    response = await StudentService.get_all_students()
+    logger.info(f"RESPONSE SENT:{response}")
+    return get_response(status="success",status_code=200,data=response)
+
 @student_route.post("/student")
-async def post_student(student:Student):
-    response =await studentService.create_student(student)
-    return response
-    
+async def create_student(student: StudentDTO):
+    logger.info(f"ENDPOINT CALLED:/STUDENT/(POST)\n DATA RECEIVED")
+    response = await StudentService.create_student(student)
+    logger.info(f"RESPONSE SENT:{response}")
+    return get_response(status="success",status_code=200,message=response)
+
 @student_route.delete("/student/{student_id}")
-async def del_student(student_id:str):
-    response = await studentService.delete_student(student_id)
-    return response
-@student_route.put("/student/{student_id}")
-async def put_student(student_id:str, student:Student):
-    response = await studentService.update_student(student_id, student)
-    return response
+async def delete_Student(student_id: str):
+    logger.info(f"ENDPOINT CALLED:/STUDENT/(DELETE)\n DATA DELETED")
+    response = await StudentService.delete_student(student_id)
+    logger.info(f"RESPONSE SENT:{response}")
+    return get_response(status="success",status_code=200,message=response)
+
+@student_route.put("/student/{Student_id}")
+async def update_Student(student_id: str, student: StudentDTO):
+    logger.info(f"ENDPOINT CALLED:/STUDENT/(UPDATE)\n DATA UPDATED")
+    response = await StudentService.update_student(student_id, student)
+    logger.info(f"RESPONSE SENT:{response}")
+    return get_response(status="success",status_code=200,message=response)
+        

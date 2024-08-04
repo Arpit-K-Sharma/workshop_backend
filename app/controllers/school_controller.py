@@ -1,30 +1,51 @@
 from fastapi import APIRouter
-from app.models.school_model import School
-from app.service.school_service import schoolService
+from app.dto.school_dto import SchoolDTO
+from app.service.school_service import SchoolService
+from app.config.logger_config import get_logger
+from app.utils.response_util import get_response
 
-school_route = APIRouter()
+school_route=APIRouter()
+logger=get_logger()
 
 @school_route.get("/school")
-async def list_schools(school:School):
-    response = await schoolService.list_school(school)
-    return response
+async def list_school():
+    logger.info("ENDPOINT CALLED : /SCHOOL (GET) \n DATA RECEIVED:")
+    response = await SchoolService.get_all_school()  # Updated method name
+    logger.info(f"RESPONSE SENT: RETRIVED {len(response)} school")
+    return get_response(status="success", status_code=200, data=response)
 
 @school_route.get("/school/{school_id}")
-async def read_school(school_id:str):
-    response =await schoolService.read_school(school_id)  
-    return response
-    
+async def get_school(school_id:str):
+    logger.info("ENDPOINT CALLED: /SCHOOL (GET)")
+    response=await SchoolService.get_school(school_id)
+    logger.info(f"RESPONSE SENT: RETRIVED {response}")
+    return get_response (status="success",status_code=200,data=response)
+
 @school_route.post("/school")
-async def post_school(school:School):
-    response =await schoolService.create_school(school)
-    return response
-    
+async def create_school(school:SchoolDTO):
+    logger.info(f"ENDPOINT CALLED: /SCHOOL(POST)\n DATA SENT:{school.dict}")
+    response =await SchoolService.create_school(school)
+    logger.info(f"RESPONSE SENT:CREATE SCHOOL{response}")
+    return get_response (status="success", status_code=200, message=response)
+
 @school_route.delete("/school/{school_id}")
-async def del_school(school_id:str):
-    response = await schoolService.delete_school(school_id)
-    return response
+async def delete_school(school_id: str):
+    logger.info(f"ENDPOINT CALLED: /SCHOOL/{school_id} (DELETE)")
+    response = await SchoolService.delete_school(school_id)
+    logger.info(f"RESPONSE SENT: {response}")
+    return get_response(status="success", status_code=200, message=response)
+
 
 @school_route.put("/school/{school_id}")
-async def put_school(school_id:str, school:School):
-    response = await schoolService.update_school(school_id, school)
-    return response
+async def update_school(school_id: str, schooldto: SchoolDTO):
+    logger.info(f"ENDPOINT CALLED: /SCHOOL/{school_id} (PUT)\n DATA SENT: {schooldto.dict()}")
+
+    response = await SchoolService.update_school(school_id, schooldto)
+    
+    logger.info(f"RESPONSE SENT: {response}")
+    return get_response(status="success", status_code=200, message=response)
+
+
+
+
+

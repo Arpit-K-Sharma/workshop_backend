@@ -1,15 +1,16 @@
-from typing import List, Optional
+from typing import Optional
 from bson import DBRef, ObjectId
 from pydantic import BaseModel, Field, validator
 
+from app.models.gallery_model import Gallery
 
-class StudentDTO(BaseModel):
-    student_name: str
-    age: int
-    phone_num: str
-    address: str
+
+class EventDTO(BaseModel):
     school_id: str
-    course_id: List[str] = Field(default_factory=list)
+    school_name: str
+    description: str
+    organized_date: str
+    gallery: Gallery
 
     class Config:
         populate_by_name = True
@@ -17,14 +18,13 @@ class StudentDTO(BaseModel):
             ObjectId: str
         }
 
-class StudentResponseDTO(BaseModel):
+class EventResponseDTO(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")
-    student_name: str
-    age: int
-    phone_num: str
-    address: str
     school_id: str
-    course_id: List[str] = Field(default_factory=list)
+    school_name: str
+    description: str
+    organized_date: str
+    gallery: Gallery
 
     @validator('id', pre=True, always=True)
     def convert_objectid_to_str(cls, v):
@@ -36,12 +36,6 @@ class StudentResponseDTO(BaseModel):
     def convert_school_id(cls, v):
         if isinstance(v, DBRef):
             return str(v.id)
-        return v
-
-    @validator('course_id', pre=True, always=True)
-    def convert_course_id(cls, v):
-        if isinstance(v, list):
-            return [str(course.id) if isinstance(course, DBRef) else course for course in v]
         return v
 
     class Config:

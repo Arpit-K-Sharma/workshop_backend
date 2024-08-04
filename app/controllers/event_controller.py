@@ -1,28 +1,43 @@
-from fastapi import APIRouter
-from app.models.event_model import Event
-from app.service.event_service import eventService
+from fastapi import APIRouter, HTTPException
+from app.dto.event_dto import EventDTO
+from app.service.event_service import EventService
+from app.config.logger_config import get_logger
+from app.utils.response_util import get_response
 
 event_route = APIRouter()
+logger = get_logger()
 
-event_route.get("/event")
-async def list_events(event:Event):
-    response = await eventService.list_event(event)
-    return response
 @event_route.get("/event")
-async def read_event():
-    response =await eventService.read_event()  
-    return response
-    
+async def get_all_event():
+    logger.info("ENDPOINT CALLED : /EVENT (GET) \n DATA RECEIVED:")
+    response = await EventService.get_all_event()
+    logger.info(f"RESPONSE SENT: RETRIEVED {len(response)} events")
+    return get_response(status="success", status_code=200, data=response)
+
+@event_route.get("/event/{school_id}")
+async def get_event_by_school_Id(school_id: str):
+    logger.info("ENDPOINT CALLED: /EVENT (GET)")
+    response = await EventService.get_school_events(school_id)
+    logger.info(f"RESPONSE SENT: RETRIEVED {response}")
+    return get_response(status="success", status_code=200, data=response)
+
 @event_route.post("/event")
-async def post_event(event:Event):
-    response =await eventService.create_event(event)
-    return response
-    
+async def create_event(event: EventDTO):
+    logger.info(f"ENDPOINT CALLED: /EVENT (POST)\n DATA SENT: {event.dict()}")
+    response = await EventService.create_event(event)
+    logger.info(f"RESPONSE SENT: CREATED EVENT {response}")
+    return get_response(status="success", status_code=201, message=response)
+
 @event_route.delete("/event/{event_id}")
-async def del_event(event_id:str):
-    response = await eventService.delete_event(event_id)
-    return response
+async def delete_event(event_id: str):
+    logger.info(f"ENDPOINT CALLED: /EVENT/{event_id} (DELETE)")
+    response = await EventService.delete_event(event_id)
+    logger.info(f"RESPONSE SENT: {response}")
+    return get_response(status="success", status_code=200, message=response)
+
 @event_route.put("/event/{event_id}")
-async def put_event(event_id:str, event:Event):
-    response = await eventService.update_event(event_id, event)
-    return response
+async def update_event(event_id: str, event_dto: EventDTO):
+    logger.info(f"ENDPOINT CALLED: /EVENT/{event_id} (PUT)\n DATA SENT: {event_dto.dict()}")
+    response = await EventService.update_event(event_id, event_dto)
+    logger.info(f"RESPONSE SENT: {response}")
+    return get_response(status="success", status_code=200, message=response)
