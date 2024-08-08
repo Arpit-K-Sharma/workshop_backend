@@ -17,13 +17,52 @@ class AttendanceService:
             return False
         return True
 
+
     async def create_attendance(self, attendance_dto: AttendanceDTO) -> str:
         if not self.validate_input(attendance_dto):
             raise HTTPException(status_code=400, detail="Invalid input for attendance_dto")
+
         self.logger.info("Creating attendance")
+
         try:
-            attendance = Attendance(**attendance_dto.dict())
-            return await self.attendance_repository.create_attendance(attendance)
+            existing_attendance = await self.attendance_repository.get_attendance_by_date(attendance_dto.date)
+            if existing_attendance:
+                # Update existing attendance
+                for school_dto in attendance_dto.schools:
+                    school_exists = False
+                    for school in existing_attendance.schools:
+                        if school.school_id == school_dto.school_id:
+                            school_exists = True
+                            # Update students
+                            for student_dto in school_dto.students:
+                                student_exists = False
+                                for student in school.students:
+                                    if student.student_id == student_dto.student_id:
+                                        student.status = student_dto.status
+                                        student.remarks = student_dto.remarks
+                                        student_exists = True
+                                        break
+                                if not student_exists:
+                                    school.students.append(student_dto)
+                            # Update teachers
+                            for teacher_dto in school_dto.teachers:
+                                teacher_exists = False
+                                for teacher in school.teachers:
+                                    if teacher.teacher_id == teacher_dto.teacher_id:
+                                        teacher.status = teacher_dto.status
+                                        teacher.remarks = teacher_dto.remarks
+                                        teacher_exists = True
+                                        break
+                                if not teacher_exists:
+                                    school.teachers.append(teacher_dto)
+                            break
+                    if not school_exists:
+                        existing_attendance.schools.append(school_dto)
+                return await self.attendance_repository.update_attendance(existing_attendance)
+            else:
+                # Create new attendance
+                attendance = Attendance(**attendance_dto.dict())
+                return await self.attendance_repository.create_attendance(attendance)
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error creating attendance: {str(e)}")
 
