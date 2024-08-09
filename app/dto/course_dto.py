@@ -20,11 +20,11 @@ class CourseDTO(BaseModel):
 # CourseResponseDTO
 class CourseResponseDTO(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")
-    course_name: str
-    course_content: str
-    course_duration: str
-    description: str
-    logo: str
+    course_name: Optional[str] = None
+    course_content: Optional[str] = None
+    course_duration: Optional[str] = None
+    description: Optional[str] = None
+    logo: Optional[str] = None
 
     @validator('id', pre=True, always=True)
     def convert_objectid_to_str(cls, v):
