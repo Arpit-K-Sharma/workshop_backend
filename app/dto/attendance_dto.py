@@ -3,25 +3,22 @@ from typing import List, Optional
 from pydantic import BaseModel, Field, validator
 from bson import ObjectId, DBRef
 
-
 class StudentStatusDTO(BaseModel):
     student_id: str
     status: str
     remarks: Optional[str] = Field(default=None)
 
-class TeacherStatusDTO(BaseModel):
-    teacher_id: str
-    status: str
-    remarks: Optional[str] = Field(default=None)
+class ClassStatusDTO(BaseModel):
+    class_id: str
+    students: List[StudentStatusDTO] = Field(default_factory=list)
 
 class SchoolStatusDTO(BaseModel):
     school_id: str
-    students: List[StudentStatusDTO] = Field(default_factory=list)
-    teachers: List[TeacherStatusDTO] = Field(default_factory=list)
+    classes: List[ClassStatusDTO] = Field(default_factory=list)
 
 class AttendanceDTO(BaseModel):
     date: str
-    schools: List[SchoolStatusDTO]
+    schools: List[SchoolStatusDTO] = Field(default_factory=list)
 
     class Config:
         populate_by_name = True
@@ -42,21 +39,19 @@ class StudentStatusResponseDTO(BaseModel):
             return str(v.id)
         return v
 
-class TeacherStatusResponseDTO(BaseModel):
-    teacher_id: str
-    status: str
-    remarks: Optional[str] = Field(default=None)
+class ClassStatusResponseDTO(BaseModel):
+    class_id: str
+    students: List[StudentStatusResponseDTO] = Field(default_factory=list)
 
-    @validator('teacher_id', pre=True, always=True)
-    def convert_teacher_id(cls, v):
+    @validator('class_id', pre=True, always=True)
+    def convert_class_id(cls, v):
         if isinstance(v, DBRef):
             return str(v.id)
         return v
 
 class SchoolStatusResponseDTO(BaseModel):
     school_id: str
-    students: List[StudentStatusResponseDTO] = Field(default_factory=list)
-    teachers: List[TeacherStatusResponseDTO] = Field(default_factory=list)
+    classes: List[ClassStatusResponseDTO] = Field(default_factory=list)
 
     @validator('school_id', pre=True, always=True)
     def convert_school_id(cls, v):
@@ -67,14 +62,13 @@ class SchoolStatusResponseDTO(BaseModel):
 class AttendanceResponseDTO(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")
     date: str
-    schools: List[SchoolStatusResponseDTO]
+    schools: List[SchoolStatusResponseDTO] = Field(default_factory=list)
 
     @validator('id', pre=True, always=True)
     def convert_objectid_to_str(cls, v):
         if isinstance(v, ObjectId):
             return str(v)
         return v
-
 
     class Config:
         populate_by_name = True

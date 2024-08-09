@@ -22,15 +22,14 @@ class StudentStatus(BaseModel):
             DBRef: lambda dbref: str(dbref.id)
         }
 
-class TeacherStatus(BaseModel):
-    teacher_id: DBRef
-    status: str
-    remarks: Optional[str] = Field(default=None)
+class ClassStatus(BaseModel):
+    class_id: DBRef
+    students: List[StudentStatus] = Field(default_factory=list)
 
-    @validator('teacher_id', pre=True, always=True)
-    def convert_teacher_id(cls, v):
+    @validator('class_id', pre=True, always=True)
+    def convert_class_id(cls, v):
         if isinstance(v, str):
-            return DBRef(collection='teachers', id=ObjectId(v))
+            return DBRef(collection='classes', id=ObjectId(v))
         return v
 
     class Config:
@@ -43,8 +42,7 @@ class TeacherStatus(BaseModel):
 
 class SchoolStatus(BaseModel):
     school_id: DBRef
-    students: List[StudentStatus] = Field(default_factory=list)
-    teachers: List[TeacherStatus] = Field(default_factory=list)
+    classes: List[ClassStatus] = Field(default_factory=list)
 
     @validator('school_id', pre=True, always=True)
     def convert_school_id(cls, v):
@@ -62,7 +60,7 @@ class SchoolStatus(BaseModel):
 
 class Attendance(BaseModel):
     date: str
-    schools: List[SchoolStatus]
+    schools: List[SchoolStatus] = Field(default_factory=list)
 
     class Config:
         populate_by_name = True
