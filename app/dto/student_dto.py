@@ -19,12 +19,12 @@ class StudentDTO(BaseModel):
 
 class StudentResponseDTO(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")
-    student_name: str
-    age: int
-    phone_num: str
-    address: str
-    school_id: str
-    course_id: List[str] = Field(default_factory=list)
+    student_name: Optional[str] = None
+    age: Optional[int] = None
+    phone_num: Optional[str] = None
+    address: Optional[str] = None
+    school_id: Optional[str] = None
+    course_id: Optional[List[str]] = Field(default_factory=list)
 
     @validator('id', pre=True, always=True)
     def convert_objectid_to_str(cls, v):

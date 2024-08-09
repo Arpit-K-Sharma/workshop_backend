@@ -47,13 +47,13 @@ class SchoolInfoResponseDTO(BaseModel):
 
 class TeacherResponseDTO(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")
-    name: str
-    address: str
-    username: str
-    password: str
-    phone_num: str
-    profile_pic: str
-    schools: List[SchoolInfoResponseDTO] = Field(default_factory=list)
+    name: Optional[str] = None
+    address: Optional[str] = None
+    username: Optional[str] = None
+    password: Optional[str] = None
+    phone_num: Optional[str] = None
+    profile_pic: Optional[str] = None
+    schools: Optional[List[SchoolInfoResponseDTO]] = Field(default_factory=list)
 
     class Config:
         populate_by_name = True
