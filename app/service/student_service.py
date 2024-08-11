@@ -67,3 +67,4 @@ class StudentService:
             raise HTTPException(status_code=500,detail=f"An error occurred while updating the student: {str(e)}")
         
         
+        

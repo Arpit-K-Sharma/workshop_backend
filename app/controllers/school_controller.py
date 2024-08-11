@@ -8,9 +8,9 @@ school_route=APIRouter()
 logger=get_logger()
 
 @school_route.get("/school")
-async def list_school():
+async def get_all_school():
     logger.info("ENDPOINT CALLED : /SCHOOL (GET) \n DATA RECEIVED:")
-    response = await SchoolService.get_all_school()  # Updated method name
+    response = await SchoolService.get_all_school() 
     logger.info(f"RESPONSE SENT: RETRIVED {len(response)} school")
     return get_response(status="success", status_code=200, data=response)
 
@@ -20,6 +20,13 @@ async def get_school(school_id:str):
     response=await SchoolService.get_school(school_id)
     logger.info(f"RESPONSE SENT: RETRIVED {response}")
     return get_response (status="success",status_code=200,data=response)
+
+@school_route.get("/student_per_course")
+async def get_course_student_per_school():
+    logger.info("ENDPOINT CALLED : /SCHOOL/STUDENT_PER_COURSE (GET) \n DATA RECEIVED:")
+    response = await SchoolService.get_students_per_course()
+    return get_response(status="success", status_code=200, data=response)
+
 
 @school_route.post("/school")
 async def create_school(school:SchoolDTO):
@@ -44,6 +51,8 @@ async def update_school(school_id: str, schooldto: SchoolDTO):
     
     logger.info(f"RESPONSE SENT: {response}")
     return get_response(status="success", status_code=200, message=response)
+
+
 
 
 

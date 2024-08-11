@@ -41,3 +41,10 @@ async def update_course(course_id: str, coursedto: CourseDTO):
     response = await CourseService.update_course(course_id, coursedto)
     logger.info(f"RESPONSE SENT: {response}")
     return get_response(status="success", status_code=200, message=response)
+
+@course_route.get("/popular_courses")
+async def get_popular_courses():
+    logger.info("ENDPOINT CALLED : /POPULAR_COURSES (GET) \n DATA RECEIVED:")
+    response = await CourseService.get_popular_courses()  # Update method name here
+    logger.info(f"RESPONSE SENT: RETRIEVED {len(response)} courses")
+    return get_response(status="success", status_code=200, data=response)

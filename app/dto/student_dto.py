@@ -9,6 +9,7 @@ class StudentDTO(BaseModel):
     phone_num: str
     address: str
     school_id: str
+    class_id: Optional[str] = None
     course_id: List[str] = Field(default_factory=list)
 
     class Config:
@@ -24,6 +25,7 @@ class StudentResponseDTO(BaseModel):
     phone_num: Optional[str] = None
     address: Optional[str] = None
     school_id: Optional[str] = None
+    class_id: Optional[str] = None
     course_id: Optional[List[str]] = Field(default_factory=list)
 
     @validator('id', pre=True, always=True)
@@ -32,7 +34,7 @@ class StudentResponseDTO(BaseModel):
             return str(v)
         return v
 
-    @validator('school_id', pre=True, always=True)
+    @validator('school_id', 'class_id', pre=True, always=True)
     def convert_school_id(cls, v):
         if isinstance(v, DBRef):
             return str(v.id)

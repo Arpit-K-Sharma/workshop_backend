@@ -10,12 +10,19 @@ class Student(BaseModel):
     phone_num: str
     address: str
     school_id: DBRef
+    class_id: DBRef
     course_id: List[DBRef] = Field(default_factory=list)
 
     @validator('school_id', pre=True, always=True)
     def convert_school_id(cls, v):
         if isinstance(v, str):
             return DBRef(collection='school', id=ObjectId(v))
+        return v
+    
+    @validator('class_id', pre=True, always=True)
+    def convert_school_id(cls, v):
+        if isinstance(v, str):
+            return DBRef(collection='class', id=ObjectId(v))
         return v
 
     @validator('course_id', pre=True, always=True)
