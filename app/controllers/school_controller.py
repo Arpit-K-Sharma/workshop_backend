@@ -1,4 +1,5 @@
-from fastapi import APIRouter
+from typing import Optional, Union
+from fastapi import APIRouter, BackgroundTasks, File, UploadFile
 from app.dto.school_dto import SchoolDTO
 from app.service.school_service import SchoolService
 from app.config.logger_config import get_logger
@@ -28,12 +29,15 @@ async def get_course_student_per_school():
     return get_response(status="success", status_code=200, data=response)
 
 
+
 @school_route.post("/school")
-async def create_school(school:SchoolDTO):
-    logger.info(f"ENDPOINT CALLED: /SCHOOL(POST)\n DATA SENT:{school.dict}")
-    response =await SchoolService.create_school(school)
-    logger.info(f"RESPONSE SENT:CREATE SCHOOL{response}")
-    return get_response (status="success", status_code=200, message=response)
+async def create_school(schooldto: SchoolDTO,background_tasks: BackgroundTasks, banner: Union[UploadFile, None] = None, logo: Union[UploadFile, None] = None):
+    logger.info(f"ENDPOINT CALLED: /SCHOOL(POST)\n DATA SENT:{schooldto.dict()}")
+    background_tasks.add_task(SchoolService.create_school, schooldto, banner, logo)
+    logger.info("School creation task added to background tasks")
+    return get_response(status="success", status_code=202, message="School creation initiated")
+
+
 
 @school_route.delete("/school/{school_id}")
 async def delete_school(school_id: str):

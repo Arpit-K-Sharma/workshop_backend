@@ -1,8 +1,16 @@
+import base64
 import io
-from fastapi import HTTPException, UploadFile
+from fastapi import HTTPException, Response, UploadFile
+from aiocache import cached
+from aiocache.serializers import JsonSerializer
+from cachetools import TTLCache
+from fastapi.responses import StreamingResponse
 from googleapiclient.discovery import build
+from fastapi.responses import JSONResponse
 from google.oauth2 import service_account
-from googleapiclient.http import MediaIoBaseUpload
+from googleapiclient.http import MediaIoBaseUpload, MediaIoBaseDownload
+
+cache = TTLCache(maxsize=100, ttl=3600)
 
 class FileService:
     SCOPES = ['https://www.googleapis.com/auth/drive']
@@ -89,3 +97,49 @@ class FileService:
         
         return folders[0]['id']
 
+
+    @staticmethod
+    @cached(ttl=3600, serializer=JsonSerializer())
+    async def download_file(file_id: str):
+        if file_id in cache:
+            return cache[file_id]
+        
+        creds = FileService.authenticate()
+        service = build('drive', 'v3', credentials=creds)
+        
+        try:
+            # Get the file metadata
+            file_metadata = service.files().get(fileId=file_id).execute()
+            file_name = file_metadata['name']
+            mime_type = file_metadata['mimeType']
+            
+            # Download the file content
+            request = service.files().get_media(fileId=file_id)
+            file_content = io.BytesIO()
+            downloader = MediaIoBaseDownload(file_content, request)
+            done = False
+            while not done:
+                _, done = downloader.next_chunk()
+            
+            file_content.seek(0)
+            content = file_content.getvalue()
+
+            # Encode the content as base64
+            encoded_content = base64.b64encode(content).decode('utf-8')
+            
+            # Create a data URL
+            data_url = f"data:{mime_type};base64,{encoded_content}"
+
+            result = JSONResponse(content={
+                "file_name": file_name,
+                "mime_type": mime_type,
+                "content_url": data_url
+            })
+
+            cache[file_id] = result
+
+            return result
+        
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"An error occurred while downloading the file: {str(e)}")
+        
