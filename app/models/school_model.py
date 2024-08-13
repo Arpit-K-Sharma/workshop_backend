@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from bson import DBRef, ObjectId
 from pydantic import BaseModel, Field, validator
 from app.models.gallery_model import Gallery
@@ -9,9 +9,9 @@ class School(BaseModel):
     email: str
     password: str
     address: str
-    banner: str
-    logo: str
-    course_id: List[DBRef] = Field(default_factory=list)
+    # banner: Optional[str] = None
+    # logo: Optional[str] = None
+    course_id: Optional[List[DBRef]] = Field(default_factory=list)
 
     @validator('course_id', pre=True, always=True)
     def convert_course_id(cls, v):

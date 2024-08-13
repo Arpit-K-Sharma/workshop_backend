@@ -11,7 +11,7 @@ class SchoolDTO(BaseModel):
     email: Optional[str]
     password: Optional[str]
     address: Optional[str]
-    course_id: Optional[List[str]] = []
+    course_id: Optional[List[str]] = Field(default_factory=list)
 
     class Config:
         populate_by_name = True
@@ -25,9 +25,9 @@ class SchoolResponseDTO(BaseModel):
     school_name: str
     email: str
     address: str
-    banner: str
-    logo: str
-    course_id: List[str] = Field(default_factory=list)
+    # banner: Optional[str]
+    # logo: Optional[str]
+    course_id: Optional[List[str]] = Field(default_factory=list)
 
     @validator('id', pre=True, always=True)
     def convert_objectid_to_str(cls, v):

@@ -31,11 +31,12 @@ async def get_course_student_per_school():
 
 
 @school_route.post("/school")
-async def create_school(schooldto: SchoolDTO,background_tasks: BackgroundTasks, banner: Union[UploadFile, None] = None, logo: Union[UploadFile, None] = None):
+async def create_school(schooldto: SchoolDTO):
     logger.info(f"ENDPOINT CALLED: /SCHOOL(POST)\n DATA SENT:{schooldto.dict()}")
-    background_tasks.add_task(SchoolService.create_school, schooldto, banner, logo)
+    response = await SchoolService.create_school(schooldto)
     logger.info("School creation task added to background tasks")
-    return get_response(status="success", status_code=202, message="School creation initiated")
+    return get_response(status="success", status_code=202, message="School creation successfully")
+
 
 
 

@@ -1,28 +1,25 @@
-from typing import Union
-from fastapi import HTTPException, UploadFile
-from pyparsing import Optional
+from fastapi import HTTPException
 from app.repositories.school_repo import SchoolRepository
 from app.models.school_model import School
 from app.dto.school_dto import SchoolDTO, SchoolResponseDTO
 from app.service.course_service import CourseService
-from app.service.file_service import FileService
 from app.service.student_service import StudentService
 
 class SchoolService:
     @staticmethod
-    async def create_school(schooldto: SchoolDTO, banner: Union[UploadFile, None] = None, logo: Union[UploadFile, None] = None):
+    async def create_school(schooldto: SchoolDTO):
         # Convert SchoolDTO to School object
         school = School(**schooldto.dict())
 
-        # Upload banner file
-        if banner:
-            banner_result = await FileService.upload_file(banner)
-            school.banner = banner_result["file_id"]
+        # # Upload banner file
+        # if banner is not None:
+        #     banner_result = await FileService.upload_file(banner)
+        #     school.banner = banner_result["file_id"]
         
-        # Upload logo file
-        if logo:
-            logo_result = await FileService.upload_file(logo)
-            school.logo = logo_result["file_id"]
+        # # Upload logo file
+        # if logo is not None:
+        #     logo_result = await FileService.upload_file(logo)
+        #     school.logo = logo_result["file_id"]
         
         # Create school
         result = await SchoolRepository.create_school(school)
