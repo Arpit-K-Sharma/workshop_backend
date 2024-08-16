@@ -13,7 +13,7 @@ class TeacherDTO(BaseModel):
     username: str
     password: str
     phone_num: str
-    profile_pic: Optional[str]
+    profile_pic: Optional[str] = None
     schools: List[SchoolInfoDTO] = Field(default_factory=list)
 
     class Config:

@@ -1,6 +1,7 @@
-from typing import List
+from typing import List, Optional
 from bson import DBRef, ObjectId
 from pydantic import BaseModel, Field, validator
+
 
 class SchoolInfo(BaseModel):
     school_id: DBRef
@@ -32,5 +33,5 @@ class Teacher(BaseModel):
     username: str
     password: str
     phone_num: str
-    profile_pic: str
+    profile_pic: Optional[str] = None
     schools: List[SchoolInfo] = Field(default_factory=list)
