@@ -15,7 +15,7 @@ class EventRepository:
     @staticmethod
     async def get_all_event():
         cursor = mongodb.collections["event"].find({})
-        return [EventResponseDTO(**event) async for event in cursor]
+        return [event async for event in cursor]
 
     
 

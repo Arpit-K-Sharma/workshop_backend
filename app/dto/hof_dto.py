@@ -1,15 +1,15 @@
-from typing import Optional
+from typing import List, Optional
 from bson import DBRef, ObjectId
+from fastapi import UploadFile
 from pydantic import BaseModel, Field, validator
 
-from app.models.gallery_model import Gallery
 
 
 class AchieverDTO(BaseModel):
     achiever_id: str
     date: str
     description: str
-    gallery: Gallery
+    gallery: List[UploadFile]
 
     class Config:
         populate_by_name = True
@@ -23,7 +23,7 @@ class AchieverResponseDTO(BaseModel):
     achiever_id: str
     date: str
     description: str
-    gallery: Gallery
+    gallery: List[str]
 
     @validator('id', pre=True, always=True)
     def convert_objectid_to_str(cls, v):

@@ -50,10 +50,9 @@ async def delete_school(school_id: str):
 
 @school_route.put("/school/{school_id}")
 async def update_school(school_id: str, schooldto: SchoolDTO):
+    print(schooldto)
     logger.info(f"ENDPOINT CALLED: /SCHOOL/{school_id} (PUT)\n DATA SENT: {schooldto.dict()}")
-
     response = await SchoolService.update_school(school_id, schooldto)
-    
     logger.info(f"RESPONSE SENT: {response}")
     return get_response(status="success", status_code=200, message=response)
 

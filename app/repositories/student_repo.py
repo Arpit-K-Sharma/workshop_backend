@@ -7,7 +7,7 @@ from app.dto.student_dto import StudentDTO,StudentResponseDTO
 class StudentRepository:
     @staticmethod
     async def create_student(student: Student):
-        result = await mongodb.collections["student"].insert_one(student.dict())
+        result = await mongodb.collections["student"].insert_one(student)
         return result
     
     @staticmethod
@@ -59,3 +59,12 @@ class StudentRepository:
             return result
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"An error occurred while updating the student: {str(e)}")
+        
+    
+    @staticmethod
+    async def get_student_by_email(email: str):
+        try:
+            student = await mongodb.collections["student"].find_one({"student_email": email})
+            return student
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"An error occurred while fetching the students: {str(e)}")

@@ -51,4 +51,12 @@ async def update_Student(student_id: str, student: StudentDTO):
     response = await StudentService.update_student(student_id, student)
     logger.info(f"RESPONSE SENT:{response}")
     return get_response(status="success",status_code=200,message=response)
+
+
+@student_route.get("/student/email/{email}")
+async def get_student_by_email(email: str):
+    logger.info(f"ENDPOINT CALLED:/STUDENT/EMAIL/(GET)\n DATA TAKEN")
+    response =  await StudentService.get_student_by_email(email)
+    logger.info(f"RESPONSE SENT:{response}")
+    return get_response(status="success",status_code=200,data=response)
         

@@ -4,13 +4,13 @@ from pydantic import BaseModel, Field, validator
 
 
 class StudentDTO(BaseModel):
-    student_name: str
-    age: int
-    phone_num: str
-    address: str
-    school_id: str
+    student_name: Optional[str] = None
+    age: Optional[str] = None
+    phone_num: Optional[str] = None
+    address: Optional[str] = None
+    school_id: Optional[str] = None
     class_id: Optional[str] = None
-    course_id: List[str] = Field(default_factory=list)
+    course_id: Optional[List[str]] = Field(default_factory=list)
 
     class Config:
         populate_by_name = True

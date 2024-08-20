@@ -1,16 +1,16 @@
 from typing import List, Optional
 from bson import DBRef, ObjectId
 from pydantic import BaseModel, Field, validator
-from app.models.gallery_model import Gallery
 
 
 class School(BaseModel):
-    school_name: str
-    email: str
-    password: str
-    address: str
+    school_name: Optional[str] = None
+    email: Optional[str] = None
+    password: Optional[str] = None
+    address: Optional[str] = None
     # banner: Optional[str] = None
     # logo: Optional[str] = None
+    school_code:Optional[str] = None
     course_id: Optional[List[DBRef]] = Field(default_factory=list)
 
     @validator('course_id', pre=True, always=True)

@@ -54,7 +54,7 @@ class SchoolRepository:
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Invalid school ID: {str(e)}")
 
-        result = await mongodb.collections["school"].update_one({"_id": _id}, {"$set": school.dict()})
+        result = await mongodb.collections["school"].update_one({"_id": _id}, {"$set": school.dict(exclude_unset=True)})
         if result.matched_count > 0:
             return "School updated successfully"
         else:

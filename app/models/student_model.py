@@ -1,17 +1,19 @@
-from typing import List
+from typing import List, Optional
 from bson import DBRef, ObjectId
 from pydantic import BaseModel, Field, validator
 
 
 
 class Student(BaseModel):
-    student_name: str
-    age: int
-    phone_num: str
-    address: str
-    school_id: DBRef
-    class_id: DBRef
-    course_id: List[DBRef] = Field(default_factory=list)
+    student_name: Optional[str] = None
+    age: Optional[str] = None
+    phone_num: Optional[str] = None
+    student_email: Optional[str] = None
+    password: Optional[str] = None
+    address: Optional[str] = None
+    school_id: Optional[DBRef] = None
+    class_id: Optional[DBRef] = None
+    course_id: Optional[List[DBRef]] = Field(default_factory=list)
 
     @validator('school_id', pre=True, always=True)
     def convert_school_id(cls, v):
@@ -19,8 +21,8 @@ class Student(BaseModel):
             return DBRef(collection='school', id=ObjectId(v))
         return v
     
-    @validator('class_id', pre=True, always=True)
-    def convert_school_id(cls, v):
+    @validator('class_id', pre=True, always=True, allow_reuse=True)
+    def convert_class_id(cls, v):
         if isinstance(v, str):
             return DBRef(collection='class', id=ObjectId(v))
         return v

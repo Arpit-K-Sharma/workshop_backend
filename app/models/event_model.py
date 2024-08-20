@@ -2,15 +2,14 @@ from typing import List, Optional
 from bson import ObjectId, DBRef
 from pydantic import BaseModel, Field, validator
 
-from app.models.gallery_model import Gallery
 
 
 class Event(BaseModel):
-    school_id: DBRef
-    school_name: str
-    description: str
-    organized_date: str
-    gallery: Gallery
+    school_id: Optional[DBRef] = None
+    school_name: Optional[str] = None
+    description: Optional[str] = None
+    organized_date: Optional[str] = None
+    gallery: Optional[List[str]] = None
 
     @validator('school_id', pre=True, always=True)
     def convert_school_id(cls, v):

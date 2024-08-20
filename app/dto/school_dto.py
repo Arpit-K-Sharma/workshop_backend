@@ -3,14 +3,13 @@ from bson import DBRef, ObjectId
 from fastapi import File, UploadFile
 from pydantic import BaseModel, Field, validator
 
-from app.models.gallery_model import Gallery
 
 
 class SchoolDTO(BaseModel):
-    school_name: Optional[str]
-    email: Optional[str]
-    password: Optional[str]
-    address: Optional[str]
+    school_name: Optional[str] = None
+    email: Optional[str] = None
+    password: Optional[str] = None
+    address: Optional[str] = None
     course_id: Optional[List[str]] = Field(default_factory=list)
 
     class Config:
@@ -22,11 +21,12 @@ class SchoolDTO(BaseModel):
 
 class SchoolResponseDTO(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")
-    school_name: str
-    email: str
-    address: str
+    school_name: Optional[str] = None
+    email: Optional[str] = None
+    address: Optional[str] = None
     # banner: Optional[str]
     # logo: Optional[str]
+    school_code: Optional[str] = None
     course_id: Optional[List[str]] = Field(default_factory=list)
 
     @validator('id', pre=True, always=True)

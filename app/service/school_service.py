@@ -1,3 +1,4 @@
+import random
 from fastapi import HTTPException
 from app.repositories.school_repo import SchoolRepository
 from app.models.school_model import School
@@ -20,6 +21,13 @@ class SchoolService:
         # if logo is not None:
         #     logo_result = await FileService.upload_file(logo)
         #     school.logo = logo_result["file_id"]
+
+        school_name_abbr = SchoolService.abbreviate_school_name(school.school_name)
+        random_numbers = ''.join([str(random.randint(0, 9)) for _ in range(4)])
+        school_code = f"{school_name_abbr}{random_numbers}"
+
+        # Add school code to the school object
+        school.school_code = school_code
         
         # Create school
         result = await SchoolRepository.create_school(school)
@@ -49,11 +57,23 @@ class SchoolService:
 
     @staticmethod
     async def update_school(school_id: str, schooldto: SchoolDTO):
-        school = School(**schooldto.dict())
-        result = await SchoolRepository.update_school(school_id, school)
+        # First, get the existing school data
+        existing_school = await SchoolRepository.get_school(school_id)
+        if not existing_school:
+            raise HTTPException(status_code=404, detail=f"School with id {school_id} not found")
+
+
+        # Create a dict of the new data, excluding None values
+        update_data = {k: v for k, v in schooldto.dict(exclude_unset=True).items() if v is not None}
+        print(update_data)
+
+        updated_school = School(**update_data)
+        result = await SchoolRepository.update_school(school_id, updated_school)
+
         if result == "School updated successfully":
             return result
-        raise HTTPException(status_code=404, detail=f"School with id {school_id} not found or no changes made")
+        raise HTTPException(status_code=500, detail="Failed to update school")
+
     
     
     @staticmethod
