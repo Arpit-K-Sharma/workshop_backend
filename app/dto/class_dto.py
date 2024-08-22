@@ -1,6 +1,6 @@
 from typing import List, Optional
 from bson import DBRef, ObjectId
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, validator
 
 from app.dto.course_dto import CourseResponseDTO
 from app.dto.student_dto import StudentResponseDTO
@@ -12,7 +12,7 @@ class ClassDTO(BaseModel):
     students: Optional[List[str]] = Field(default_factory=list)
     teachers: Optional[List[str]] = Field(default_factory=list)
     courses: Optional[List[str]] = Field(default_factory=list)
-    school_id: Optional[str] = Field(default=None)
+    school_id: Optional[str] = None
 
     class Config:
         populate_by_name = True
@@ -46,15 +46,15 @@ class ClassResponseDTO(BaseModel):
     teachers: Optional[List[TeacherResponseDTO]] = Field(default_factory=list)
     courses: Optional[List[CourseResponseDTO]] = Field(default_factory=list)
     school_id: Optional[str] = Field(default=None)
-
     @field_validator('id', mode='before')
     def convert_objectid_to_str(cls, v):
         if isinstance(v, ObjectId):
             return str(v)
         return v
 
-    @field_validator('school_id', mode='before')
-    def convert_dbref_to_str(cls, v):
+    
+    @validator('school_id',pre=True, always=True)
+    def convert_school_id(cls, v):
         if isinstance(v, DBRef):
             return str(v.id)
         return v

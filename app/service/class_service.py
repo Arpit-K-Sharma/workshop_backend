@@ -37,10 +37,5 @@ class ClassService:
     async def get_class_by_class_id(class_id: str):
         result = await ClassRepository.get_class_by_class_id(class_id)
         return ClassResponseDTO(
-            id=str(result['_id']),
-            class_name=result['class_name'],
-            students=[StudentResponseDTO(**student) for student in result['students']],
-            teachers=[TeacherResponseDTO(**teacher) for teacher in result['teachers']],
-            courses=[CourseResponseDTO(**course) for course in result['courses']],
-            school=SchoolResponseDTO(**result['school']) if result.get('school') else None
+            **result
         )

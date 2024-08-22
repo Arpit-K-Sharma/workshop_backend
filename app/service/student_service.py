@@ -69,7 +69,7 @@ class StudentService:
             
             result = await StudentRepository.create_student(student_data)
             if result:
-                return "Student Created Successfully"
+                return str(result.inserted_id)
             raise HTTPException(status_code=400, detail="Could not create student")
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"An error occurred while creating the student: {str(e)}")
