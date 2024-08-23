@@ -32,8 +32,9 @@ class ClassRepository:
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Invalid school ID: {str(e)}")
         
-        school_ref = DBRef(collection="school", id=school_id)
+        school_ref = DBRef(collection="school", id=_id)
         cursor = mongodb.collections["class"].find({"school_id": school_ref})
+        print(cursor)
         return await cursor.to_list(length=None)
 
     @staticmethod

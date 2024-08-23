@@ -45,7 +45,7 @@ async def delete_Student(student_id: str):
     logger.info(f"RESPONSE SENT:{response}")
     return get_response(status="success",status_code=200,message=response)
 
-@student_route.put("/student/{Student_id}")
+@student_route.put("/student/{student_id}")
 async def update_Student(student_id: str, student: StudentDTO):
     logger.info(f"ENDPOINT CALLED:/STUDENT/(UPDATE)\n DATA UPDATED")
     response = await StudentService.update_student(student_id, student)

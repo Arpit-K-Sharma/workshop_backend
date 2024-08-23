@@ -5,11 +5,11 @@ from pydantic import BaseModel, Field, validator
 
 
 class CourseDTO(BaseModel):
-    course_name: str
-    course_content: str
-    course_duration: str
-    description: str
-    logo: str
+    course_name: Optional[str]
+    course_content: Optional[str]
+    course_duration: Optional[str]
+    description: Optional[str]
+    logo: Optional[str]
 
     class Config:
         populate_by_name = True

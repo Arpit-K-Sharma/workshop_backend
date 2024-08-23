@@ -31,11 +31,19 @@ class ClassService:
     @staticmethod
     async def get_class_by_school_id(school_id: str):
         results = await ClassRepository.get_class_by_school_id(school_id)
+        
         return [ClassDTO(**class_instance) for class_instance in results]
     
     @staticmethod
     async def get_class_by_class_id(class_id: str):
         result = await ClassRepository.get_class_by_class_id(class_id)
+        print(result)
         return ClassResponseDTO(
-            **result
+            id=str(result['_id']),
+            class_name=result['class_name'],
+            students=[StudentResponseDTO(**student) for student in result['students']],
+            teachers=[TeacherResponseDTO(**teacher) for teacher in result['teachers']],
+            courses=[CourseResponseDTO(**course) for course in result['courses']],
+            school_id=result['school_id']
         )
+    

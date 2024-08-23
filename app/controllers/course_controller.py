@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter
 from app.dto.course_dto import CourseDTO
 from app.service.course_service import CourseService
@@ -47,4 +48,12 @@ async def get_popular_courses():
     logger.info("ENDPOINT CALLED : /POPULAR_COURSES (GET) \n DATA RECEIVED:")
     response = await CourseService.get_popular_courses()  # Update method name here
     logger.info(f"RESPONSE SENT: RETRIEVED {len(response)} courses")
+    return get_response(status="success", status_code=200, data=response)
+
+
+@course_route.post("/course_list")
+async def get_courses_by_ids(course_ids: List[str]):
+    logger.info(f"ENDPOINT CALLED:/COURSE/LIST/(POST)\n DATA TAKEN")
+    response = await CourseService.get_courses_by_ids(course_ids)
+    logger.info(f"RESPONSE SENT:{response}")
     return get_response(status="success", status_code=200, data=response)

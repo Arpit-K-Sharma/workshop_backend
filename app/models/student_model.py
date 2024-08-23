@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, validator
 
 class Student(BaseModel):
     student_name: Optional[str] = None
-    age: Optional[str] = None
+    age: Optional[int] = None
     phone_num: Optional[str] = None
     student_email: Optional[str] = None
     password: Optional[str] = None

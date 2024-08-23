@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import HTTPException
 from app.repositories.course_repo import CourseRepository
 from app.models.course_model import Course
@@ -71,5 +72,19 @@ class CourseService:
             course["students"] = course_count[course["courseName"]]
 
         return courseDict
+    
+
+    @staticmethod
+    async def get_courses_by_ids(course_ids: List[str]):
+        courses = []
+        for course_id in course_ids:
+            course = await CourseRepository.get_course(course_id)
+            if course:
+                print(course)
+                courses.append(CourseResponseDTO(
+                    id= course.id,
+                    course_name= course.course_name,
+                    description= course.description))
+        return courses  
 
         

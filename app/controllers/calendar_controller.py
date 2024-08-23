@@ -10,6 +10,7 @@ calendar_route = APIRouter()
 @calendar_route.post("/calendar")
 async def create_event(calendar : CalendarDTO):
     logger.info(f"ENDPOINT CALLED: /CALENDAR (POST) \n DATA SENT:{calendar.dict()}")
+    
     response = await CalendarService.create_academic_event(calendar)
     logger.info(f"RESPONSE SENT: {response}")
     return get_response(status="success", message="Calendar Added Successfully", status_code=200)

@@ -108,9 +108,19 @@ class StudentService:
             raise HTTPException(status_code=500,detail=f"An error occurred while deleting the student: {str(e)}")
 
     @staticmethod
-    async def update_student(student_id: str, student: StudentDTO):
+    async def update_student(student_id: str, studentdto: StudentDTO):
         try:
-            result = await StudentRepository.update_student(student_id, student)
+            # Generate unique email and get school_code
+            unique_email, school_code = await StudentService.generate_unique_email(
+                studentdto.student_name, 
+                studentdto.school_id
+            )
+
+
+
+            
+            result = await StudentRepository.update_student(student_id, studentdto)
+
             if isinstance(result, str):
                 # If result is a string, it's a message from the repository
                 return result
@@ -124,7 +134,8 @@ class StudentService:
                 else:
                     return "No changes made to the student"
         except Exception as e:
-            raise HTTPException(status_code=500,detail=f"An error occurred while updating the student: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"An error occurred while updating the student: {str(e)}")
+
         
     @staticmethod
     async def get_student_by_email(email: str):

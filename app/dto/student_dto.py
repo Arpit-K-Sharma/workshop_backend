@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field, validator
 
 class StudentDTO(BaseModel):
     student_name: Optional[str] = None
-    age: Optional[str] = None
+    age: Optional[int] = None
     phone_num: Optional[str] = None
     address: Optional[str] = None
     school_id: Optional[str] = None
@@ -23,6 +23,7 @@ class StudentResponseDTO(BaseModel):
     student_name: Optional[str] = None
     age: Optional[int] = None
     phone_num: Optional[str] = None
+    student_email: Optional[str] = None
     address: Optional[str] = None
     school_id: Optional[str] = None
     class_id: Optional[str] = None
