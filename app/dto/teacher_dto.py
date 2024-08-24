@@ -35,16 +35,10 @@ class SchoolInfoResponseDTO(BaseModel):
             return str(v.id)
         return v
 
-    @validator('courses', pre=True, always=True)
-    def convert_courses(cls, v):
+    @validator('courses', 'classes', pre=True, always=True)
+    def convert_list_items(cls, v):
         if isinstance(v, list):
-            return [str(course.id) if isinstance(course, DBRef) else course for course in v]
-        return v
-    
-    @validator('classes', pre=True, always=True)
-    def convert_courses(cls, v):
-        if isinstance(v, list):
-            return [str(clas.id) if isinstance(clas, DBRef) else clas for clas in v]
+            return [str(item.id) if isinstance(item, DBRef) else str(item) if isinstance(item, ObjectId) else item for item in v]
         return v
 
     class Config:
@@ -74,4 +68,4 @@ class TeacherResponseDTO(BaseModel):
         if isinstance(v, ObjectId):
             return str(v)
         return v
-
+    
