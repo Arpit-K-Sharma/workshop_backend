@@ -39,3 +39,11 @@ async def get_student_attendance(student_id: str):
     attendances = await AttendanceService.get_student_attendance(student_id)   
     logger.info(f"RESPONSE SENT: {attendances}")
     return get_response(status="success", data=attendances, status_code=200)
+
+
+@attendance_route.get("/attendances/class/{class_id}")
+async def get_class_attendance(class_id: str):
+    logger.info(f"ENDPOINT CALLED: /attendance/class/{class_id} (GET)")
+    response = await AttendanceService.get_class_attendance(class_id)
+    logger.info(f"RESPONSE SENT: {response}")
+    return get_response(status="success", status_code=200, data=response)

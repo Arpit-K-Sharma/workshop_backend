@@ -1,5 +1,6 @@
+from collections import defaultdict
 from datetime import datetime
-from typing import List, Optional
+from typing import Dict, List, Optional
 from bson import DBRef, ObjectId
 from fastapi import HTTPException
 from app.repositories.attendance_repo import AttendanceRepository
@@ -83,15 +84,63 @@ class AttendanceService:
             raise HTTPException(status_code=500, detail=f"Error retrieving attendance by date: {str(e)}")
 
     @staticmethod
-    async def get_student_attendance(student_id: str) -> List[AttendanceResponseDTO]:
+    async def get_student_attendance(student_id: str) -> List[dict]:
         if not AttendanceService.validate_input(student_id):
             raise HTTPException(status_code=400, detail="Invalid input for student_id")
         try:
-            repository = AttendanceRepository()
-            attendances = await repository.get_student_attendance(student_id)
-            return [AttendanceService.convert_to_response_dto(attendance) for attendance in attendances]
+            attendances = await AttendanceRepository.get_student_attendance(student_id)
+            
+            student_attendance_history = []
+            for attendance in attendances:
+                for school in attendance.schools:
+                    for class_status in school.classes:
+                        for student_status in class_status.students:
+                            if str(student_status.student_id) == student_id:
+                                student_attendance_history.append({
+                                    "date": attendance.date,
+                                    "status": student_status.status,
+                                    "remarks": student_status.remarks
+                                })
+                                break  # Found the student, no need to continue searching
+                        else:
+                            continue
+                        break
+                    else:
+                        continue
+                    break
+            
+            return student_attendance_history
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error retrieving student attendance: {str(e)}")
+
+
+    @staticmethod
+    async def get_class_attendance(class_id: str) -> List[Dict]:
+        if not AttendanceService.validate_input(class_id):
+            raise HTTPException(status_code=400, detail="Invalid input for class_id")
+        
+        try:
+            attendances = await AttendanceRepository.get_attendances_by_class_id(class_id)
+            
+            class_attendance_history = defaultdict(lambda: {"date": "", "students": []})
+            
+            for attendance in attendances:
+                attendance_date = attendance.date
+                for school in attendance.schools:
+                    for class_status in school.classes:
+                        if str(class_status.class_id) == class_id:
+                            for student_status in class_status.students:
+                                class_attendance_history[attendance_date]["date"] = attendance_date
+                                class_attendance_history[attendance_date]["students"].append({
+                                    "student_id": str(student_status.student_id),
+                                    "status": student_status.status,
+                                    "remarks": student_status.remarks
+                                })
+            
+            return list(class_attendance_history.values())
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error retrieving class attendance: {str(e)}")
+
 
     @staticmethod
     def convert_to_response_dto(attendance: Attendance) -> AttendanceResponseDTO:

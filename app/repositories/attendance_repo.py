@@ -38,3 +38,13 @@ class AttendanceRepository:
         attendances = await attendances_cursor.to_list(length=None)
         result = [AttendanceResponseDTO(**{**attendance, "id": str(attendance["_id"])}) for attendance in attendances]
         return result
+    
+    @staticmethod
+    async def get_attendances_by_class_id(class_id: str) -> List[Attendance]:
+        class_id = ObjectId(class_id)
+        cursor = mongodb.collections['attendance'].find(
+            {"schools.classes.class_id.$id": class_id}
+        )
+        attendances = await cursor.to_list(length=None)
+        result = [AttendanceResponseDTO(**{**attendance, "id": str(attendance["_id"])}) for attendance in attendances]
+        return result
