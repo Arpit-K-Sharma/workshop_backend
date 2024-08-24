@@ -3,18 +3,19 @@ from bson import DBRef, ObjectId
 from pydantic import BaseModel, Field, validator
 
 class SchoolInfoDTO(BaseModel):
-    school_id: str
-    courses: List[str] = Field(default_factory=list)
+    school_id: Optional[str]
+    classes: Optional[List[str]] = Field(default_factory=list)
+    courses: Optional[List[str]] = Field(default_factory=list)
 
 
 class TeacherDTO(BaseModel):
-    name: str
-    address: str
-    username: str
-    password: str
-    phone_num: str
+    name: Optional[str]
+    address: Optional[str]
+    username: Optional[str]
+    password: Optional[str]
+    phone_num: Optional[str]
     profile_pic: Optional[str] = None
-    schools: List[SchoolInfoDTO] = Field(default_factory=list)
+    schools: Optional[List[SchoolInfoDTO]] = Field(default_factory=list)
 
     class Config:
         populate_by_name = True
@@ -24,8 +25,9 @@ class TeacherDTO(BaseModel):
 
 
 class SchoolInfoResponseDTO(BaseModel):
-    school_id: str
-    courses: List[str] = Field(default_factory=list)
+    school_id: Optional[str]
+    classes: Optional[List[str]] = Field(default_factory=list)
+    courses: Optional[List[str]] = Field(default_factory=list)
 
     @validator('school_id', pre=True, always=True)
     def convert_school_id(cls, v):
@@ -37,6 +39,12 @@ class SchoolInfoResponseDTO(BaseModel):
     def convert_courses(cls, v):
         if isinstance(v, list):
             return [str(course.id) if isinstance(course, DBRef) else course for course in v]
+        return v
+    
+    @validator('classes', pre=True, always=True)
+    def convert_courses(cls, v):
+        if isinstance(v, list):
+            return [str(clas.id) if isinstance(clas, DBRef) else clas for clas in v]
         return v
 
     class Config:
