@@ -40,7 +40,7 @@ async def admin_verification(token:str = Depends(oauth2_scheme)):
 
 def is_admin(payload: dict) -> bool:
     role = payload.get("role")
-    if (role == "ROLE_ADMIN"):
+    if (role == "ADMIN"):
         return True
     else:
         return False
@@ -55,7 +55,7 @@ async def mentor_verification(token:str = Depends(oauth2_scheme)):
 
 def is_mentor(payload):
     role = payload.get("role")
-    if(role == "ROLE_MENTOR"):
+    if(role == "MENTOR"):
         return True
     else:
         return False
@@ -70,7 +70,7 @@ async def student_verification(token:str = Depends(oauth2_scheme)):
 
 def is_student(payload):
     role = payload.get("role")
-    if(role == "ROLE_STUDENT"):
+    if(role == "STUDENT"):
         return True
     else:
         return False

@@ -13,6 +13,7 @@ from app.controllers.school_controller import school_route
 from app.controllers.hof_controller import hof_route
 from app.controllers.class_controller import class_route
 from app.controllers.calendar_controller import calendar_route
+from app.controllers.auth_controller import auth_route
 from app.config.logger_config import get_logger
 
 app = FastAPI()
@@ -70,6 +71,7 @@ app.include_router(feedback_route, tags=["Feedback"])
 app.include_router(hof_route,tags=["HOF"])
 app.include_router(class_route,tags=["Class"])
 app.include_router(calendar_route,tags=["calendar"])
+app.include_router(auth_route,tags=["calendar"])
 
 
 
