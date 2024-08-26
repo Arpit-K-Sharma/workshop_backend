@@ -9,18 +9,16 @@ load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
-
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))  # Convert to integer
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-def create_access_token(data:dict):
+def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp":expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, ALGORITHM)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
-
 
 def verify_token(token: str):
     try:
@@ -30,9 +28,8 @@ def verify_token(token: str):
         return payload
     except JWTError:
         raise HTTPException(status_code=401, detail="Could not validate credentials")
-    
 
-async def admin_verification(token:str = Depends(oauth2_scheme)):
+async def admin_verification(token: str = Depends(oauth2_scheme)):
     payload = verify_token(token)
     if not is_admin(payload):
         raise HTTPException(status_code=403, detail="Not authorized to perform this action")
@@ -40,38 +37,24 @@ async def admin_verification(token:str = Depends(oauth2_scheme)):
 
 def is_admin(payload: dict) -> bool:
     role = payload.get("role")
-    if (role == "ADMIN"):
-        return True
-    else:
-        return False
-    
+    return role == "ADMIN"
 
-async def mentor_verification(token:str = Depends(oauth2_scheme)):
+async def mentor_verification(token: str = Depends(oauth2_scheme)):
     payload = verify_token(token)
     if not is_mentor(payload):
         raise HTTPException(status_code=403, detail="Not authorized to perform this action")
     return payload
 
-
-def is_mentor(payload):
+def is_mentor(payload: dict) -> bool:
     role = payload.get("role")
-    if(role == "MENTOR"):
-        return True
-    else:
-        return False
-    
+    return role == "MENTOR"
 
-async def student_verification(token:str = Depends(oauth2_scheme)):
+async def student_verification(token: str = Depends(oauth2_scheme)):
     payload = verify_token(token)
     if not is_student(payload):
         raise HTTPException(status_code=403, detail="Not authorized to perform this action")
     return payload
 
-
-def is_student(payload):
+def is_student(payload: dict) -> bool:
     role = payload.get("role")
-    if(role == "STUDENT"):
-        return True
-    else:
-        return False
-
+    return role == "STUDENT"
