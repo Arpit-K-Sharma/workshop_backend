@@ -71,7 +71,7 @@ app.include_router(feedback_route, tags=["Feedback"])
 app.include_router(hof_route,tags=["HOF"])
 app.include_router(class_route,tags=["Class"])
 app.include_router(calendar_route,tags=["calendar"])
-app.include_router(auth_route,tags=["calendar"])
+app.include_router(auth_route,tags=["auth"])
 
 
 
