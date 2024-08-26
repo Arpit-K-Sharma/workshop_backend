@@ -45,7 +45,7 @@ async def lifespan(app: FastAPI):
         admin_count = await mongodb.collections['admin'].count_documents({})
         if admin_count == 0:
             admin_data = {
-                "username": "admin",
+                "email": "admin@gmail.com",
                 "password": "admin123",
                 "role": "ADMIN",
             }
