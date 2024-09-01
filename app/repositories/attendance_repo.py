@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import List, Optional
-from bson import ObjectId
+from bson import ObjectId, DBRef
 from fastapi import HTTPException
 from app.config.db_config import mongodb
-from app.dto.attendance_dto import ClassAttendanceDTO, StudentMonthlyAttendanceDTO, ClassMonthlyAttendanceDTO, StudentCourseMonthlyAttendanceDTO
+from app.dto.attendance_dto import ClassAttendanceDTO, StudentMonthlyAttendanceDTO, StudentAttendanceDTO, ClassMonthlyAttendanceDTO, StudentCourseMonthlyAttendanceDTO
 
 class AttendanceRepository:
 
@@ -54,19 +54,6 @@ class AttendanceRepository:
            return None
        return ClassAttendanceDTO(**attendance)
 
-
-    @staticmethod
-    async def get_class_monthly_attendance(class_id: str, year: int, month: int) -> ClassMonthlyAttendanceDTO:
-        start_date = datetime(year, month, 1).strftime("%Y-%m-%d")
-        end_date = datetime(year, month + 1, 1).strftime("%Y-%m-%d") if month < 12 else datetime(year + 1, 1, 1).strftime("%Y-%m-%d")
-        
-        attendances = await mongodb.collections["attendance"].find({
-            "class_id": class_id,
-            "date": {"$gte": start_date, "$lt": end_date}
-        }).sort("date", 1).to_list(None)
-        
-        return ClassMonthlyAttendanceDTO(class_id=class_id, attendances=attendances)
-      
 
     @staticmethod
     async def get_student_course_monthly_attendance(student_id: str, class_id: str, year: int, month: int) -> StudentCourseMonthlyAttendanceDTO:

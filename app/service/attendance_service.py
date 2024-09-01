@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List, Optional
 from fastapi import HTTPException
 from app.repositories.attendance_repo import AttendanceRepository
-from app.dto.attendance_dto import ClassAttendanceDTO, StudentMonthlyAttendanceDTO, ClassMonthlyAttendanceDTO, StudentCourseMonthlyAttendanceDTO
+from app.dto.attendance_dto import ClassAttendanceDTO,StudentAttendanceDTO, StudentMonthlyAttendanceDTO, ClassMonthlyAttendanceDTO, StudentCourseMonthlyAttendanceDTO
 
 class AttendanceService:
 
@@ -32,16 +32,6 @@ class AttendanceService:
           return attendance
        except Exception as e:
           raise HTTPException(status_code=500, detail=f"Error retrieving class attendance: {str(e)}")
-
-
-    @staticmethod
-    async def get_class_monthly_attendance(class_id: str, year: int, month: int) -> ClassMonthlyAttendanceDTO:
-        try:
-            repository = AttendanceRepository()
-            attendance = await repository.get_class_monthly_attendance(class_id, year, month)
-            return attendance
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error retrieving class monthly attendance: {str(e)}")
 
 
     @staticmethod

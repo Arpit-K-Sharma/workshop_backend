@@ -32,14 +32,6 @@ async def get_class_attendance_by_date(class_id: str, date: str):
         return get_response(status="success", message="No attendance found for the given date", data={}, status_code=200)
     return get_response(status="success", message="Class Attendance Retrieved Successfully", data=attendance, status_code=200)
 
-
-@attendance_route.get("/attendances/class/{class_id}/month/{year}/{month}", response_model=ClassMonthlyAttendanceDTO)
-async def get_class_monthly_attendance(class_id: str, year: int, month: int):
-    logger.info(f"ENDPOINT CALLED: /attendances/class/{class_id}/month/{year}/{month} (GET)")
-    attendance = await AttendanceService.get_class_monthly_attendance(class_id, year, month)
-    logger.info(f"RESPONSE SENT: {attendance}")
-    return get_response(status="success", message="Class Monthly Attendance Retrieved Successfully", data=attendance, status_code=200)
-
 @attendance_route.get("/attendances/student/{student_id}/class/{class_id}/month/{year}/{month}", response_model=StudentCourseMonthlyAttendanceDTO)
 async def get_student_course_monthly_attendance(student_id: str, class_id: str, year: int, month: int):
     logger.info(f"ENDPOINT CALLED: /attendances/student/{student_id}/course/{class_id}/month/{year}/{month} (GET)")
