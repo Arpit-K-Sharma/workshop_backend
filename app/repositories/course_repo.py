@@ -1,4 +1,4 @@
-from bson import ObjectId
+from bson import DBRef, ObjectId
 from bson.json_util import dumps, loads
 from app.models.course_model import Course
 from app.config.db_config import mongodb
@@ -36,11 +36,33 @@ class CourseRepository:
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Invalid course ID: {str(e)}")
         
+        # Create a DBRef for the course
+        course_ref = DBRef(collection="course", id=_id)
+
+        # Delete the course
         result = await mongodb.collections["course"].delete_one({"_id": _id})
-        if result.deleted_count > 0:
-            return "Course deleted successfully from database"
-        else:
+        if result.deleted_count == 0:
             raise HTTPException(status_code=404, detail="Course not found")
+
+        # Remove course reference from schools
+        await mongodb.collections["school"].update_many(
+            {"course_id": course_ref},
+            {"$pull": {"course_id": course_ref}}
+        )
+
+        # Remove course reference from classes
+        await mongodb.collections["class"].update_many(
+            {"courses": course_ref},
+            {"$pull": {"courses": course_ref}}
+        )
+
+        # Remove course reference from students
+        await mongodb.collections["student"].update_many(
+            {"course_id": course_ref},
+            {"$pull": {"course_id": course_ref}}
+        )
+
+        return "Course deleted successfully and removed from related collections"
         
     @staticmethod
     async def update_course(course_id: str, course: Course):
@@ -49,7 +71,7 @@ class CourseRepository:
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Invalid course ID: {str(e)}")
         
-        result = await mongodb.collections["course"].update_one({"_id": _id}, {"$set": course.dict()})
+        result = await mongodb.collections["course"].update_one({"_id": _id}, {"$set": course.dict(exclude_unset=True)})
         if result.modified_count > 0:
             return "Course updated successfully"
         else:

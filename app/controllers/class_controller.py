@@ -33,8 +33,15 @@ async def get_class_by_school_id(school_id: str):
 async def get_class_by_class_id(class_id:str):
     logger.info(f"ENDPOINT CALLED: /CLASS/{class_id} (GET)")
     response = await ClassService.get_class_by_class_id(class_id)
-    print(response)
     logger.info("RESPONSE SENT SUCCESSFULLY")
     return get_response(status="success",status_code=200,data=response)
+
+@class_route.delete("/class/{class_id}")
+async def delete_class(class_id:str):
+    logger.info(f"ENDPOINT CALLED: /CLASS/{class_id} (DELETE)")
+    response = await ClassService.delete_class(class_id)
+    logger.info("CLASS WITH {class_id} DELETED SUCCESSFULLY")
+    return get_response(status="success",status_code=200,message=response)
+
 
 

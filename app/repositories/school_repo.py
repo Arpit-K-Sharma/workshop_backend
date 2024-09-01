@@ -41,11 +41,37 @@ class SchoolRepository:
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Invalid school ID: {str(e)}")
 
-        result = await mongodb.collections["school"].delete_one({"_id": _id})
-        if result.deleted_count > 0:
-            return "School deleted successfully"
-        else:
-            raise HTTPException(status_code=404, detail="School not found")
+        try:
+            # Create a DBRef for the school
+            school_ref = DBRef(collection="school", id=_id)
+
+            # Delete the school
+            school_result = await mongodb.collections["school"].delete_one({"_id": _id})
+            if school_result.deleted_count == 0:
+                raise HTTPException(status_code=404, detail="School not found")
+
+            # Delete associated classes
+            classes_result = await mongodb.collections["class"].delete_many({"school_id": school_ref})
+
+            # Delete associated students
+            students_result = await mongodb.collections["student"].delete_many({"school_id": school_ref})
+
+            # Update teachers by removing this school from their schools list
+            teachers_result = await mongodb.collections["teacher"].update_many(
+                {"schools.school_id": school_ref},
+                {"$pull": {"schools": {"school_id": school_ref}}}
+            )
+
+            return {
+                "message": "School and associated data deleted successfully",
+                "deleted_school_count": school_result.deleted_count,
+                "deleted_classes_count": classes_result.deleted_count,
+                "deleted_students_count": students_result.deleted_count,
+                "updated_teachers_count": teachers_result.modified_count
+            }
+
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
     @staticmethod
     async def update_school(school_id: str, school: School):

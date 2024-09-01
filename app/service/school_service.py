@@ -51,8 +51,8 @@ class SchoolService:
     @staticmethod
     async def delete_school(school_id: str):
         result = await SchoolRepository.delete_school(school_id)
-        if result == "School deleted successfully":
-            return result
+        if result:
+            return "School Deleted Successfully !!!"
         raise HTTPException(status_code=404, detail=f"School with id {school_id} not found")
 
     @staticmethod

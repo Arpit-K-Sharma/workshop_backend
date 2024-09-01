@@ -37,7 +37,6 @@ class ClassService:
     @staticmethod
     async def get_class_by_class_id(class_id: str):
         result = await ClassRepository.get_class_by_class_id(class_id)
-        print(result)
         return ClassResponseDTO(
             id=str(result['_id']),
             class_name=result['class_name'],
@@ -46,4 +45,11 @@ class ClassService:
             courses=[CourseResponseDTO(**course) for course in result['courses']],
             school_id=result['school_id']
         )
+    
+    @staticmethod
+    async def delete_class(class_id: str):
+        result = await ClassRepository.delete_class(class_id)
+        if result:
+            return "Class Deleted Successfully !!!"
+        raise HTTPException(status_code=404, detail=f"class with id {class_id} not found")
     
