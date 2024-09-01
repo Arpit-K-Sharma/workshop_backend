@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import HTTPException
 from app.config.db_config import mongodb
 from app.models.feedback_model import Feedback
@@ -33,8 +34,11 @@ class FeedbackRepo:
 
     @staticmethod
     async def create_feedback(feedback: Feedback):
-        await mongodb.collections['feedback'].insert_one(feedback.dict(exclude_unset=True))
-
+        feedback_dict = feedback.dict()
+        if 'feedback_date' not in feedback_dict or feedback_dict['feedback_date'] is None:
+            feedback_dict['feedback_date'] = datetime.utcnow()
+        
+        await mongodb.collections['feedback'].insert_one(feedback_dict)
     @staticmethod
     async def update_feedback(feedback_id: str, feedback: Feedback):
         _id = ObjectId(feedback_id)

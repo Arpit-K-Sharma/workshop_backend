@@ -1,50 +1,101 @@
 from datetime import datetime
 from typing import List, Optional
-from bson import DBRef, ObjectId
+from bson import ObjectId
 from fastapi import HTTPException
-from app.models.attendance_model import Attendance
-from app.dto.attendance_dto import AttendanceDTO, AttendanceResponseDTO
 from app.config.db_config import mongodb
+from app.dto.attendance_dto import ClassAttendanceDTO, StudentMonthlyAttendanceDTO, ClassMonthlyAttendanceDTO, StudentCourseMonthlyAttendanceDTO
 
 class AttendanceRepository:
-    @staticmethod
-    async def create_attendance(attendance: Attendance):
-        result = await mongodb.collections["attendance"].insert_one(attendance.dict())
-        return {"inserted_id": str(result.inserted_id)}
 
     @staticmethod
-    async def upsert_attendance(attendance: Attendance) -> str:
-        filter_doc = {"date": attendance.date}
-        update_doc = {"$set": attendance.dict()}
-        result = await mongodb.collections['attendance'].update_one(filter_doc, update_doc, upsert=True)
-        return str(result.upserted_id) if result.upserted_id else "Attendance record updated successfully"
-
-    @staticmethod
-    async def get_all_attendances() -> List[AttendanceResponseDTO]:
-        attendances = mongodb.collections['attendance'].find({})
-        return [AttendanceResponseDTO(**attendance) async for attendance in attendances]
-
-    @staticmethod
-    async def get_attendance_by_date(date: str) -> Optional[AttendanceResponseDTO]:
-        attendance = await mongodb.collections['attendance'].find_one({"date": date})
-        return AttendanceResponseDTO(**attendance) if attendance else None
-
-    @staticmethod
-    async def get_student_attendance(student_id: str) -> List[AttendanceResponseDTO]:
-        student_object_id = ObjectId(student_id)
-        attendances_cursor = mongodb.collections['attendance'].find(
-            {"schools.classes.students.student_id.$id": student_object_id}
+    async def create_or_update_class_attendance(class_attendance: ClassAttendanceDTO) -> dict:
+        result = await mongodb.collections["attendance"].update_one(
+            {"date": class_attendance.date, "class_id": class_attendance.class_id},
+            {"$set": class_attendance.dict()},
+            upsert=True
         )
-        attendances = await attendances_cursor.to_list(length=None)
-        result = [AttendanceResponseDTO(**{**attendance, "id": str(attendance["_id"])}) for attendance in attendances]
-        return result
+        return {"modified_count": result.modified_count, "upserted_id": str(result.upserted_id) if result.upserted_id else None}
+
+    @staticmethod
+    async def get_student_monthly_attendance(student_id: str, year: int, month: int) -> StudentMonthlyAttendanceDTO:
+        start_date = datetime(year, month, 1).strftime("%Y-%m-%d")
+        end_date = datetime(year, month + 1, 1).strftime("%Y-%m-%d") if month < 12 else datetime(year + 1, 1, 1).strftime("%Y-%m-%d")
+        
+        pipeline = [
+            {"$match": {
+                "date": {"$gte": start_date, "$lt": end_date},
+                "students.student_id": student_id
+            }},
+            {"$project": {
+                "date": 1,
+                "status": {
+                    "$filter": {
+                        "input": "$students",
+                        "as": "student",
+                        "cond": {"$eq": ["$$student.student_id", student_id]}
+                    }
+                }
+            }},
+            {"$unwind": "$status"},
+            {"$project": {
+                "date": 1,
+                "status": "$status.status",
+                "remarks": "$status.remarks"
+            }}
+        ]
+        
+        attendances = await mongodb.collections["attendance"].aggregate(pipeline).to_list(None)
+        return StudentMonthlyAttendanceDTO(student_id=student_id, attendances=attendances)
+
+    @staticmethod
+    async def get_class_attendance_by_date(class_id: str, date: str) -> Optional[ClassAttendanceDTO]:
+       attendance = await mongodb.collections["attendance"].find_one({"class_id": class_id, "date": date})
+       if not attendance:
+           return None
+       return ClassAttendanceDTO(**attendance)
+
+
+    @staticmethod
+    async def get_class_monthly_attendance(class_id: str, year: int, month: int) -> ClassMonthlyAttendanceDTO:
+        start_date = datetime(year, month, 1).strftime("%Y-%m-%d")
+        end_date = datetime(year, month + 1, 1).strftime("%Y-%m-%d") if month < 12 else datetime(year + 1, 1, 1).strftime("%Y-%m-%d")
+        
+        attendances = await mongodb.collections["attendance"].find({
+            "class_id": class_id,
+            "date": {"$gte": start_date, "$lt": end_date}
+        }).sort("date", 1).to_list(None)
+        
+        return ClassMonthlyAttendanceDTO(class_id=class_id, attendances=attendances)
+      
+
+    @staticmethod
+    async def get_student_course_monthly_attendance(student_id: str, class_id: str, year: int, month: int) -> StudentCourseMonthlyAttendanceDTO:
+      start_date = datetime(year, month, 1).strftime("%Y-%m-%d")
+      end_date = datetime(year, month + 1, 1).strftime("%Y-%m-%d") if month < 12 else datetime(year + 1, 1, 1).strftime("%Y-%m-%d")
     
-    @staticmethod
-    async def get_attendances_by_class_id(class_id: str) -> List[Attendance]:
-        class_id = ObjectId(class_id)
-        cursor = mongodb.collections['attendance'].find(
-            {"schools.classes.class_id.$id": class_id}
-        )
-        attendances = await cursor.to_list(length=None)
-        result = [AttendanceResponseDTO(**{**attendance, "id": str(attendance["_id"])}) for attendance in attendances]
-        return result
+      pipeline = [
+        {"$match": {
+            "date": {"$gte": start_date, "$lt": end_date},
+            "class_id": class_id,
+            "students.student_id": student_id
+        }},
+        {"$project": {
+            "date": 1,
+            "status": {
+                "$filter": {
+                    "input": "$students",
+                    "as": "student",
+                    "cond": {"$eq": ["$$student.student_id", student_id]}
+                }
+            }
+        }},
+        {"$unwind": "$status"},
+        {"$project": {
+            "date": 1,
+            "status": "$status.status",
+            "remarks": "$status.remarks"
+        }}
+    ]
+    
+      attendances = await mongodb.collections["attendance"].aggregate(pipeline).to_list(None)
+      return StudentCourseMonthlyAttendanceDTO(student_id=student_id, course_id=class_id, attendances=attendances)

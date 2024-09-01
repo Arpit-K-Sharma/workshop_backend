@@ -45,7 +45,7 @@ async def lifespan(app: FastAPI):
         admin_count = await mongodb.collections['admin'].count_documents({})
         if admin_count == 0:
             admin_data = {
-                "username": "admin",
+                "email": "admin@gmail.com",
                 "password": "admin123",
                 "role": "ADMIN",
             }
@@ -71,7 +71,7 @@ app.include_router(feedback_route, tags=["Feedback"])
 app.include_router(hof_route,tags=["HOF"])
 app.include_router(class_route,tags=["Class"])
 app.include_router(calendar_route,tags=["calendar"])
-app.include_router(auth_route,tags=["calendar"])
+app.include_router(auth_route,tags=["auth"])
 
 
 

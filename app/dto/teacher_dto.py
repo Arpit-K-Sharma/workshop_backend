@@ -52,7 +52,6 @@ class TeacherResponseDTO(BaseModel):
     name: Optional[str] = None
     address: Optional[str] = None
     username: Optional[str] = None
-    password: Optional[str] = None
     phone_num: Optional[str] = None
     profile_pic: Optional[str] = None
     schools: Optional[List[SchoolInfoResponseDTO]] = Field(default_factory=list)

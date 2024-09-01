@@ -1,11 +1,13 @@
+from datetime import datetime
 from bson import DBRef, ObjectId
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, Field, validator
 
 
 class Feedback(BaseModel):
     feedback_by: DBRef
     feedback_for: DBRef
     rating: int
+    feedback_date: str
     feedback_description: str
 
     @validator('feedback_by', 'feedback_for', pre=True, always=True)
