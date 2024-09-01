@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class AuthModel(BaseModel):
-    username: str
+    email: str
     password: str
 
     class Config:

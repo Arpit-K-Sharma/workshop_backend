@@ -18,7 +18,7 @@ async def get_all_teachers():
 
 @teacher_route.get("/teacher/{teacher_id}")
 async def get_teacher_by_id(teacher_id: str):
-    logger.info(f"ENDPOINT CALLED:/STUDENT/(GET)\n DATA DELETED")
+    logger.info(f"ENDPOINT CALLED:/TEACHER/(GET)\n DATA RECIEVED")
     response = await TeacherService.get_teacher_by_id(teacher_id)
     logger.info(f"RESPONSE SENT:{response}")
     return get_response(status="success",status_code=200,data=response)

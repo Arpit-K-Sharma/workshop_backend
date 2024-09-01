@@ -34,7 +34,7 @@ class FeedbackService:
         try:
             feedback = Feedback(**feedbackdto.dict())
             await FeedbackRepo.create_feedback(feedback)
-            return {"message": "Feedback created successfully"}
+            return {"message": "Feedback created successfully"} 
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"An error occurred while creating feedback: {str(e)}")
 

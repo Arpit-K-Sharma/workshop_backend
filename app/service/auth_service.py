@@ -3,7 +3,7 @@ from app.config.db_config import mongodb
 from app.utils.auth_utils import create_access_token
 
 class AuthService:
-    async def admin_login(username: str, password: str):
+    async def admin_login(email: str, password: str):
         admin = await mongodb.collections['admin'].find_one({"role": "ADMIN"})
         
         # Debugging: Print the admin object
@@ -13,19 +13,20 @@ class AuthService:
             raise HTTPException(status_code=400, detail="Admin not found")
         
         # Check if 'email' and 'password' keys exist in the admin object
-        if 'username' not in admin or 'password' not in admin:
+        if 'email' not in admin or 'password' not in admin:
             raise HTTPException(status_code=400, detail="Invalid admin data")
         
-        if username == admin['username'] and password == admin['password']:
-            access_token = create_access_token(data={"username": username, "role": "ADMIN"})
+        if email == admin['email'] and password == admin['password']:
+            access_token = create_access_token(data={"email": email, "role": "ADMIN"})
             return {"access_token": access_token, "token_type": "bearer"}
         
         raise HTTPException(status_code=400, detail="Invalid credentials")
     
-    async def mentpr_login(email:str, password:str):
-        mentor = await mongodb.collections['teacher'].find_one({"email":email})
-        if mentor and email == mentor['email'] and password == mentor['password']:
-            access_token = create_access_token(data={"email":email, "role":"MENTOR"})
+    async def mentor_login(email:str, password:str):
+        mentor = await mongodb.collections['teacher'].find_one({"username":email})
+        id = str(mentor['_id'])
+        if mentor and email == mentor['username'] and password == mentor['password']:
+            access_token = create_access_token(data={"email":email,"id":id,"role":"MENTOR"})
             return {"access_token":access_token, "token_type": "bearer"}
         raise HTTPException(status_code=400, detail="Invalid credentials")
     

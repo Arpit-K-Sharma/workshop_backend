@@ -7,6 +7,7 @@ class FeedbackDTO(BaseModel):
     feedback_by: str
     feedback_for: str
     rating: int
+    feedback_date: str
     feedback_description: str
 
     class Config:
@@ -21,6 +22,7 @@ class FeedbackResponseDTO(BaseModel):
     feedback_by: str
     feedback_for: str
     rating: int
+    feedback_date: str
     feedback_description: str
 
     @validator('id', pre=True, always=True)
