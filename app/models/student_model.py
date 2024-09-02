@@ -14,6 +14,7 @@ class Student(BaseModel):
     school_id: Optional[DBRef] = None
     class_id: Optional[DBRef] = None
     course_id: Optional[List[DBRef]] = Field(default_factory=list)
+    profile_picture: Optional[str] = None
 
     @validator('school_id', pre=True, always=True)
     def convert_school_id(cls, v):
