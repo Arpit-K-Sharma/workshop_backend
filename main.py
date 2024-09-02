@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException
 from fastapi.concurrency import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,10 +15,14 @@ from app.controllers.hof_controller import hof_route
 from app.controllers.class_controller import class_route
 from app.controllers.calendar_controller import calendar_route
 from app.controllers.auth_controller import auth_route
+from app.controllers.journal_controller import journal_route
 from app.config.logger_config import get_logger
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
 
 app = FastAPI()
 logger = get_logger()
+scheduler = AsyncIOScheduler()
 
 # CORS middleware
 app.add_middleware(
@@ -55,7 +60,14 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"Error inserting admin data: {e}")
 
+    # Starting the scheduler
+    scheduler.start()
+    scheduler.add_job(check_journal_entries, CronTrigger(hour = 20, minute = 0))
+
     yield
+
+    # Shuting the scheduler down
+    scheduler.shutdown()
 
 app.router.lifespan_context = lifespan
 
@@ -72,6 +84,38 @@ app.include_router(hof_route,tags=["HOF"])
 app.include_router(class_route,tags=["Class"])
 app.include_router(calendar_route,tags=["calendar"])
 app.include_router(auth_route,tags=["auth"])
+app.include_router(journal_route, tags=["Journals"])
+
+
+async def check_journal_entries():
+    try:
+        today = datetime.utcnow().date()
+        start_of_day = datetime(today.year, today.month, today.day)
+        end_of_day = start_of_day + timedelta(days=1)
+
+        # Find all mentors
+        mentors = await mongodb.collections["teacher"].find().to_list(None)
+        mentor_ids = [mentor['_id'] for mentor in mentors]
+
+        # Find journal entries for today
+        journal_entries = await mongodb.collections["journal"].find({
+            "date": today.strftime('%d-%m-%Y')
+        }).to_list(None)
+        journal_mentor_ids = [entry['mentor_id'].id for entry in journal_entries]
+
+        # Find mentors who haven't posted their journals
+        mentors_without_journals = [mentor for mentor in mentor_ids if mentor not in journal_mentor_ids]
+
+        # Save the list of mentors who haven't posted their journals
+        await mongodb.collections["missing_journals"].insert_one({
+            "date": today,
+            "mentors": mentors_without_journals
+        })
+
+        logger.info(f"Checked journal entries for {today}. Mentors without journals: {mentors_without_journals}")
+
+    except Exception as e:
+        logger.error(f"Error checking journal entries: {e}")
 
 
 

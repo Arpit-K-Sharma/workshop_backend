@@ -58,8 +58,8 @@ class CourseRepository:
 
         # Remove course reference from students
         await mongodb.collections["student"].update_many(
-            {"course_id": course_ref},
-            {"$pull": {"course_id": course_ref}}
+            {"course_id": course_id},
+            {"$pull": {"course_id": course_id}}
         )
 
         return "Course deleted successfully and removed from related collections"

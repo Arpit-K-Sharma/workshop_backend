@@ -54,7 +54,7 @@ class SchoolRepository:
             classes_result = await mongodb.collections["class"].delete_many({"school_id": school_ref})
 
             # Delete associated students
-            students_result = await mongodb.collections["student"].delete_many({"school_id": school_ref})
+            students_result = await mongodb.collections["student"].delete_many({"school_id": school_id})
 
             # Update teachers by removing this school from their schools list
             teachers_result = await mongodb.collections["teacher"].update_many(
