@@ -10,7 +10,30 @@ class JournalService:
     async def create_journal_entry(journal: JournalDTO) -> dict:
         try:
             repository = JournalRepository()
-            journal_model = Journal(**journal.dict())
+            
+            # Extract the date from the JournalDTO object
+            date = journal.date
+            
+            # Compute the day of the week
+            day_of_week = date.strftime('%A')
+            
+            # Extract day, month, and year
+            day = date.strftime('%d')
+            month = date.strftime('%B')
+            year = date.strftime('%Y')
+            
+            # Create the Journal model object
+            journal_model = Journal(
+                body=journal.body,
+                date=date,
+                day_of_week=day_of_week,
+                day=day,
+                month=month,
+                year=year,
+                mentor_id=journal.mentor_id
+            )
+            
+            # Save the journal entry to the database
             result = await repository.create_journal_entry(journal_model)
             return result
         except Exception as e:

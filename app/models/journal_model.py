@@ -1,10 +1,15 @@
 from datetime import datetime
+from typing import Optional
 from bson import DBRef, ObjectId
 from pydantic import BaseModel, Field, field_validator
 
 class Journal(BaseModel):
     body: str
     date: str
+    day_of_week: str
+    day: str
+    month: str
+    year: str
     mentor_id: DBRef
 
     @field_validator('date', mode='before')
