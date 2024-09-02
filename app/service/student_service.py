@@ -1,10 +1,16 @@
+import asyncio
+import configparser
 import random
+import uuid
 from fastapi import HTTPException
 from app.repositories.school_repo import SchoolRepository
 from app.repositories.student_repo import StudentRepository
 from app.models.student_model import Student
 from app.dto.student_dto import StudentDTO,StudentResponseDTO
+from app.service.file_service import FileService
 
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 class StudentService: 
     @staticmethod
@@ -54,25 +60,55 @@ class StudentService:
     @staticmethod
     async def create_student(studentdto: StudentDTO):
         try:
+
+            # Generate filename
+            file_name = await StudentService.create_filename(studentdto.student_name, studentdto.profile_picture.filename)
+
+            folder = config['aws'][f'aws_s3_image_path']
+            file_path = f"{folder}/{file_name}"
+            file = studentdto.profile_picture
+            file_content = await file.read()
+
+            # Upload File
+            asyncio.create_task(FileService.upload_to_s3(file_content,file_path))
+
             # Generate unique email and get school_code
             unique_email, school_code = await StudentService.generate_unique_email(
                 studentdto.student_name, 
                 studentdto.school_id
             )
-
             
-            # Add the generated email and school_code (as password) to the student data
-            student = Student(**studentdto.dict(exclude_unset=True))
-            student_data = student.dict()
-            student_data['student_email'] = unique_email
-            student_data['password'] = school_code
+            # Convert StudentDTO to Student, excluding profile_picture
+            student_data = studentdto.dict(exclude_unset=True, exclude={'profile_picture'})
+            student = Student(**student_data)
             
-            result = await StudentRepository.create_student(student_data)
+            # Manually set the profile_picture field
+            student.profile_picture = file_name
+            student.student_email = unique_email
+            student.password = school_code
+            
+            result = await StudentRepository.create_student(student.dict())
             if result:
                 return str(result.inserted_id)
             raise HTTPException(status_code=400, detail="Could not create student")
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"An error occurred while creating the student: {str(e)}")
+        
+    @staticmethod
+    async def create_filename(student_name: str, original_file_name: str) -> str:
+        try:
+            # Generate a random 5-character UUID
+            random_uuid = str(uuid.uuid4())[:5]
+            # Replace spaces with underscores in the student's name
+            sanitized_student_name = student_name.replace(" ", "_")
+            # Extract the file extension from the original file name
+            file_extension = original_file_name.split('.')[-1]
+            # Create the unique filename
+            unique_filename = f"{sanitized_student_name}_{random_uuid}.{file_extension}"
+            return unique_filename
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"An error occurred while generating the filename: {str(e)}")
+
     
     @staticmethod
     async def get_student_by_id(student_id: str):

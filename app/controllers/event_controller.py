@@ -23,10 +23,9 @@ async def get_event_by_school_Id(school_id: str):
 
 @event_route.post("/event")
 async def create_event(event: EventDTO = Depends(EventDTO.as_form)):
-    # print(event.school_name)
-    # logger.info(f"ENDPOINT CALLED: /EVENT (POST)\n DATA SENT: {event.dict()}")
+    logger.info(f"ENDPOINT CALLED: /EVENT (POST)\n DATA SENT: {event.dict()}")
     response = await EventService.create_event(event)
-    # logger.info(f"RESPONSE SENT: CREATED EVENT {response}")
+    logger.info(f"RESPONSE SENT: CREATED EVENT {response}")
     return get_response(status="success", status_code=201, message=response)
 
 @event_route.delete("/event/{event_id}")

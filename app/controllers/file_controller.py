@@ -1,11 +1,16 @@
 import base64
-from fastapi import APIRouter, HTTPException, UploadFile, File
+import configparser
+import io
+from fastapi import APIRouter, HTTPException, Response, UploadFile, File
 from typing import List
+from fastapi.responses import StreamingResponse
 from app.service.file_service import FileService
 from app.utils.response_util import get_response
 from app.config.logger_config import get_logger
 
 file_route = APIRouter()
+config = configparser.ConfigParser()
+config.read('config.ini')
 logger = get_logger()
 
 @file_route.post("/files/upload")
@@ -24,8 +29,27 @@ async def upload_files(files: List[UploadFile] = File(...)):
     except Exception as e:
         logger.error(f"Error during file upload: {str(e)}")
         raise HTTPException(status_code=500, detail=f"An error occurred during file upload: {str(e)}")
+    
+@file_route.get("/files/download/{filename}")
+async def download_file(filename: str):
+    logger.info(f"ENDPOINT CALLED: /files/download/{filename}")
+    folder = config['aws']['aws_s3_image_path']
+    file_path = f"{folder}/{filename}"
+    
+    try:
+        file_content = await FileService.download_from_s3(file_path)
+        if not file_content:
+            raise HTTPException(status_code=404, detail="File not found")
+        
+        return Response(content=file_content, media_type="application/octet-stream", headers={"Content-Disposition": f"attachment; filename={filename}"})
+    except HTTPException as he:
+        logger.error(f"HTTPException during file download: {str(he)}")
+        raise he
+    except Exception as e:
+        logger.error(f"Unexpected error during file download: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Unexpected error during file download: {str(e)}")
 
-@file_route .post("/files/download")
+@file_route.post("/files/download")
 async def download_files(filenames: List[str]):
     logger.info("CALLED: POST - Retrieving files for display")
     try:
