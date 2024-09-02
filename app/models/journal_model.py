@@ -3,7 +3,6 @@ from bson import DBRef, ObjectId
 from pydantic import BaseModel, Field, field_validator
 
 class Journal(BaseModel):
-    title: str
     body: str
     date: str
     mentor_id: DBRef

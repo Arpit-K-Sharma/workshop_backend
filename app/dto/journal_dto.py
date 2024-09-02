@@ -1,17 +1,16 @@
 from datetime import datetime
+from typing import Optional
 from bson import DBRef, ObjectId
 from pydantic import BaseModel, Field, field_validator
 
 class JournalDTO(BaseModel):
-    title: str
     body: str
-    date: datetime = Field(default_factory=datetime.now)
+    date: Optional[datetime] = Field(default_factory=datetime.now)
     mentor_id: str
 
 
 class JournalResponseDTO(BaseModel):
     id: str = Field(default=None, alias="_id")
-    title: str
     body: str
     date: str 
     mentor_id: str
