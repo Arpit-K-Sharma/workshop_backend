@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from app.dto.teacher_dto import TeacherDTO, TeacherResponseDTO
 from app.service.teacher_service import TeacherService
 from app.models import teacher_model
@@ -24,7 +24,7 @@ async def get_teacher_by_id(teacher_id: str):
     return get_response(status="success",status_code=200,data=response)
 
 @teacher_route.post("/teacher")
-async def create_teacher(teacher: TeacherDTO):
+async def create_teacher(teacher: TeacherDTO = Depends(TeacherDTO.as_form)):
     logger.info(f"ENDPOINT CALLED:/TEACHER/(POST)\n DATA RECEIVED")
     response = await TeacherService.create_teacher(teacher)
     logger.info(F"RESPONSE SENT:RETRIEVED{response}")

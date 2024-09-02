@@ -1,18 +1,53 @@
+import asyncio
+import configparser
+import uuid
 from fastapi import HTTPException
 from app.repositories.teacher_repo import TeacherRepository
 from app.service.class_service import ClassService
 from app.models.teacher_model import Teacher, SchoolInfo
 from app.dto.teacher_dto import TeacherResponseDTO, TeacherDTO
+from app.service.file_service import FileService
 
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 class TeacherService:
     @staticmethod
     async def create_teacher(teacherdto: TeacherDTO):
-        teacher=Teacher(**teacherdto.dict())
+        # Generate filename
+        file_name = await TeacherService.create_filename(teacherdto.name, teacherdto.profile_picture.filename)
+
+        folder = config['aws'][f'aws_s3_image_path']
+        file_path = f"{folder}/{file_name}"
+        file = teacherdto.profile_picture
+        file_content = await file.read()
+
+        # Upload File
+        asyncio.create_task(FileService.upload_to_s3(file_content,file_path))
+
+        teacher_data = teacherdto.dict(exclude_unset=True, exclude = {'profile_picture'})
+        teacher=Teacher(**teacher_data)
+        teacher.profile_picture = file_name
         result = await TeacherRepository.create_teacher(teacher)
         if result: 
             return "Teacher Created Successfully"
         raise HTTPException(status_code=400, detail="Could not create teacher")
+    
+    @staticmethod
+    async def create_filename(teacher_name: str, original_file_name: str) -> str:
+        try:
+            # Generate a random 5-character UUID
+            random_uuid = str(uuid.uuid4())[:5]
+            # Replace spaces with underscores in the student's name
+            sanitized_student_name = teacher_name.replace(" ", "_")
+            # Extract the file extension from the original file name
+            file_extension = original_file_name.split('.')[-1]
+            # Create the unique filename
+            unique_filename = f"{sanitized_student_name}_{random_uuid}.{file_extension}"
+            return unique_filename
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"An error occurred while generating the filename: {str(e)}")
+
 
     @staticmethod
     async def get_teacher_by_id(teacher_id: str):

@@ -40,5 +40,5 @@ class Teacher(BaseModel):
     username: Optional[str] = None
     password: Optional[str] = None
     phone_num: Optional[str] = None
-    profile_pic: Optional[str] = None
-    schools: List[SchoolInfo] = Field(default_factory=list)
+    profile_picture: Optional[str] = None
+    schools: Optional[List[SchoolInfo]] = Field(default_factory=list)
