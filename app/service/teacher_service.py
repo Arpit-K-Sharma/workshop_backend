@@ -1,7 +1,9 @@
 from fastapi import HTTPException
 from app.repositories.teacher_repo import TeacherRepository
+from app.service.class_service import ClassService
 from app.models.teacher_model import Teacher, SchoolInfo
 from app.dto.teacher_dto import TeacherResponseDTO, TeacherDTO
+
 
 class TeacherService:
     @staticmethod
@@ -21,7 +23,34 @@ class TeacherService:
             return TeacherResponseDTO(**result)
         except Exception as e:
             raise HTTPException(status_code=500,detail=f"An error occurred while fetching the teacher: {str(e)}")
+        
     
+    @staticmethod
+    async def get_numOfClasses_students(teacher_id: str):
+        try:
+            teacher_dict = {
+                "schoolCount": 0,
+                "classCount": 0,
+                "studentCount": 0,
+            }
+
+            result = await TeacherRepository.get_teacher_by_id(teacher_id)
+            if not result:
+                raise HTTPException(status_code=404, detail=f"Teacher with id {teacher_id} not found")
+
+            teacherResponse = TeacherResponseDTO(**result)
+            for response in teacherResponse.schools:
+                teacher_dict["schoolCount"] += 1
+                for perClass in response.classes:
+                    teacher_dict["classCount"] += 1
+                    student = await ClassService.get_class_by_class_id(perClass)
+                    teacher_dict["studentCount"] += len(student.students)
+
+            return teacher_dict
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"An error occurred while fetching the teacher: {str(e)}")
+            
+        
     @staticmethod
     async def get_all_teachers():
         try:

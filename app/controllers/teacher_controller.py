@@ -29,6 +29,13 @@ async def create_teacher(teacher: TeacherDTO):
     response = await TeacherService.create_teacher(teacher)
     logger.info(F"RESPONSE SENT:RETRIEVED{response}")
     return get_response(status="success",status_code=200,message=response)
+
+@teacher_route.get("/teacher/classes/{teacher_id}")
+async def get_numOfClasses_students(teacher_id: str):
+    logger.info(f"ENDPOINT CALLED:/TEACHER/CLASSES/(GET)\n DATA RECIEVED")
+    response = await TeacherService.get_numOfClasses_students(teacher_id)
+    logger.info(f"RESPONSE SENT:{response}")
+    return get_response(status="success",status_code=200,data=response)
         
 
 @teacher_route.delete("/teacher/{teacher_id}")

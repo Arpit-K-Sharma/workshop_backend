@@ -30,6 +30,7 @@ class AuthService:
             return {"access_token":access_token, "token_type": "bearer"}
         raise HTTPException(status_code=400, detail="Invalid credentials")
     
+    
     async def student_login(email:str, password:str):
         student = await mongodb.collections['student'].find_one({"student_email":email})
         id = str(student['_id'])

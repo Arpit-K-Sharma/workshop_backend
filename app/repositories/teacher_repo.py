@@ -1,5 +1,6 @@
 import os
 import shutil
+from typing import List
 from fastapi import File, HTTPException, UploadFile
 from app.config.db_config import mongodb
 from bson import ObjectId
@@ -50,3 +51,4 @@ class TeacherRepository:
             
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"An error occurred while updating the teacher: {str(e)}")
+        
