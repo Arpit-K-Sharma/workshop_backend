@@ -6,6 +6,7 @@ class StudentAttendanceDTO(BaseModel):
     student_id: str
     student_name : str
     status: str
+    laptop: bool
     remarks: Optional[str] = None
 
 class ClassAttendanceDTO(BaseModel):
@@ -16,6 +17,7 @@ class ClassAttendanceDTO(BaseModel):
 class StudentDailyAttendanceDTO(BaseModel):
     date: str
     status: str
+    laptop: bool
     remarks: Optional[str] = None
 
 class StudentMonthlyAttendanceDTO(BaseModel):

@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, validator
 class StudentStatus(BaseModel):
     student_id: DBRef
     status: str
+    laptop: bool
     remarks: Optional[str] = Field(default=None)
 
     @validator('student_id', pre=True, always=True)
