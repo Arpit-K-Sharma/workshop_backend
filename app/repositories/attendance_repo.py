@@ -80,7 +80,8 @@ class AttendanceRepository:
         {"$project": {
             "date": 1,
             "status": "$status.status",
-            "remarks": "$status.remarks"
+            "remarks": "$status.remarks",
+            "laptop": "$status.laptop"
         }}
     ]
     

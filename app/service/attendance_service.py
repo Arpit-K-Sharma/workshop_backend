@@ -37,6 +37,7 @@ class AttendanceService:
     @staticmethod
     async def get_student_course_monthly_attendance(student_id: str, class_id: str, year: int, month: int) -> StudentCourseMonthlyAttendanceDTO:
         try:
+          print(student_id, class_id, year, month)
           repository = AttendanceRepository()
           attendance = await repository.get_student_course_monthly_attendance(student_id, class_id, year, month)
           return attendance
