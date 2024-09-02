@@ -59,7 +59,7 @@ class FileService:
     @staticmethod
     async def download_from_s3(file_path: str) -> bytes:
         s3 = FileService.get_s3_client()
-        bucket_name = config.get('aws', {}).get('aws_bucket_name')
+        bucket_name = config["aws"]["aws_bucket_name"]
         
         if not bucket_name:
             raise HTTPException(status_code=500, detail="AWS bucket name is not configured")
