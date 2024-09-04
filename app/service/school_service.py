@@ -5,6 +5,7 @@ from app.models.school_model import School
 from app.dto.school_dto import SchoolDTO, SchoolResponseDTO
 from app.service.course_service import CourseService
 from app.service.student_service import StudentService
+from app.utils.password_utils import get_password_hash
 
 class SchoolService:
     @staticmethod
@@ -28,6 +29,9 @@ class SchoolService:
 
         # Add school code to the school object
         school.school_code = school_code
+
+        # Password hashing
+        school.password = get_password_hash(school.password)
         
         # Create school
         result = await SchoolRepository.create_school(school)

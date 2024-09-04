@@ -8,6 +8,7 @@ from app.repositories.student_repo import StudentRepository
 from app.models.student_model import Student
 from app.dto.student_dto import StudentDTO,StudentResponseDTO
 from app.service.file_service import FileService
+from app.utils.password_utils import get_password_hash
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -85,7 +86,9 @@ class StudentService:
             # Manually set the profile_picture field
             student.profile_picture = file_name
             student.student_email = unique_email
-            student.password = school_code
+
+            # Password hashing
+            student.password = get_password_hash(school_code)
             
             result = await StudentRepository.create_student(student.dict())
             if result:

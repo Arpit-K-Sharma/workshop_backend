@@ -46,7 +46,7 @@ async def del_teacher(teacher_id: str):
     return get_response(status="success",status_code=200,message=response)
     
 @teacher_route.put("/teacher/{teacher_id}")
-async def update_teacher(teacher_id: str,teacher_dto:TeacherDTO):
+async def update_teacher(teacher_id: str,teacher_dto:TeacherDTO = Depends(TeacherDTO.as_form)):
     logger.info(f"ENDPOINT CALLED:/TEACHER/(UPDATE)\n DATA SENT:{teacher_dto.dict()}")
     response = await TeacherService.update_teacher(teacher_id,teacher_dto)
     logger.info(F"RESPONSE SENT:RETRIEVED{response}")

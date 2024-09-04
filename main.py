@@ -21,6 +21,8 @@ from app.config.logger_config import get_logger
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 
+from app.utils.password_utils import get_password_hash
+
 app = FastAPI()
 logger = get_logger()
 scheduler = AsyncIOScheduler()
@@ -55,6 +57,7 @@ async def lifespan(app: FastAPI):
                 "password": "admin123",
                 "role": "ADMIN",
             }
+            admin_data["password"] = get_password_hash(admin_data["password"])
             await mongodb.collections['admin'].insert_one(admin_data)
             logger.info("Admin data added to the collection.")
         

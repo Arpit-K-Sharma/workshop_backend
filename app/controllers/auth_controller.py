@@ -16,3 +16,7 @@ async def mentor_login(mentor_auth: AuthModel):
 @auth_route.post("/student/login")
 async def student_login(student_auth: AuthModel):
     return await AuthService.student_login(student_auth.email, student_auth.password)
+
+@auth_route.post("/school/login")
+async def student_login(school_auth: AuthModel):
+    return await AuthService.school_login(school_auth.email, school_auth.password)

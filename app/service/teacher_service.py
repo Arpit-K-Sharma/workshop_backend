@@ -7,6 +7,7 @@ from app.service.class_service import ClassService
 from app.models.teacher_model import Teacher, SchoolInfo
 from app.dto.teacher_dto import TeacherResponseDTO, TeacherDTO
 from app.service.file_service import FileService
+from app.utils.password_utils import get_password_hash
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -28,6 +29,9 @@ class TeacherService:
         teacher_data = teacherdto.dict(exclude_unset=True, exclude = {'profile_picture'})
         teacher=Teacher(**teacher_data)
         teacher.profile_picture = file_name
+
+        # Password hashing
+        teacher.password = get_password_hash(teacher.password)
         result = await TeacherRepository.create_teacher(teacher)
         if result: 
             return "Teacher Created Successfully"
