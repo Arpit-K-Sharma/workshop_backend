@@ -23,7 +23,6 @@ class AssignmentRepository:
         try:
             # Fetch the existing assignment
             existing_assignment = await mongodb.collections["assignment"].find_one({"_id": _id})
-            print(existing_assignment)
             
             if not existing_assignment:
                 raise HTTPException(status_code=404, detail="Assignment not found")

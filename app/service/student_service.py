@@ -2,6 +2,7 @@ import asyncio
 import configparser
 import random
 import uuid
+from bson import ObjectId
 from fastapi import HTTPException
 from app.repositories.school_repo import SchoolRepository
 from app.repositories.student_repo import StudentRepository
@@ -61,17 +62,21 @@ class StudentService:
     @staticmethod
     async def create_student(studentdto: StudentDTO):
         try:
+            file_name = None
+        
+        # Check if profile picture is provided
+            if studentdto.profile_picture:
 
             # Generate filename
-            file_name = await StudentService.create_filename(studentdto.student_name, studentdto.profile_picture.filename)
+                file_name = await StudentService.create_filename(studentdto.student_name, studentdto.profile_picture.filename)
 
-            folder = config['aws'][f'aws_s3_image_path']
-            file_path = f"{folder}/{file_name}"
-            file = studentdto.profile_picture
-            file_content = await file.read()
+                folder = config['aws'][f'aws_s3_image_path']
+                file_path = f"{folder}/{file_name}"
+                file = studentdto.profile_picture
+                file_content = await file.read()
 
-            # Upload File
-            asyncio.create_task(FileService.upload_to_s3(file_content,file_path))
+                # Upload File
+                asyncio.create_task(FileService.upload_to_s3(file_content,file_path))
 
             # Generate unique email and get school_code
             unique_email, school_code = await StudentService.generate_unique_email(
@@ -147,31 +152,13 @@ class StudentService:
             raise HTTPException(status_code=500,detail=f"An error occurred while deleting the student: {str(e)}")
 
     @staticmethod
-    async def update_student(student_id: str, studentdto: StudentDTO):
+    async def update_student(student_id: str, studentdto: dict):
         try:
-            # Generate unique email and get school_code
-            unique_email, school_code = await StudentService.generate_unique_email(
-                studentdto.student_name, 
-                studentdto.school_id
-            )
-
-
-
-            
-            result = await StudentRepository.update_student(student_id, studentdto)
-
-            if isinstance(result, str):
-                # If result is a string, it's a message from the repository
-                return result
-            else:
-                # If result is not a string, it should be an UpdateResult object
-                if result.matched_count == 0:
-                    raise HTTPException(status_code=404, detail="Student not found")
-                
-                if result.modified_count > 0:
-                    return "Student updated successfully"
-                else:
-                    return "No changes made to the student"
+            _id = ObjectId(student_id)
+            result = await StudentRepository.update_student(_id, studentdto)
+            if not result:
+                raise HTTPException(status_code=404, detail="Student not found")
+            return result
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"An error occurred while updating the student: {str(e)}")
 

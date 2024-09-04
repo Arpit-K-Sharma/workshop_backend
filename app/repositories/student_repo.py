@@ -15,6 +15,7 @@ class StudentRepository:
         try:
             _id = ObjectId(student_id)
             result = await mongodb.collections["student"].find_one({"_id": _id})
+            print(result)
             if result is None:
                 raise HTTPException(status_code=404, detail="Student not found")
             return result
@@ -52,11 +53,27 @@ class StudentRepository:
         
 
     @staticmethod
-    async def update_student(student_id: str, student: Student):
+    async def update_student(student_id: ObjectId, student: dict):
         try:
-            _id = ObjectId(student_id)
-            result = await mongodb.collections["student"].update_one({"_id": _id}, {"$set": student.dict(exclude_unset=True)})
-            return result
+            existing_student = await mongodb.collections["student"].find_one({"_id": student_id})
+            if not existing_student:
+                raise HTTPException(status_code=404, detail="Student not found")
+            
+            # Create an update dictionary with only the fields that are set
+            update_data ={}
+            for key, value in student.items():
+                if value is not None:
+                    update_data[key] = value
+            
+            
+            result = await mongodb.collections["student"].update_one(
+                {"_id": student_id},
+                {"$set": update_data}
+            )
+            
+            if result.modified_count:
+                return "Student Updated Successfully"
+            
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"An error occurred while updating the student: {str(e)}")
         

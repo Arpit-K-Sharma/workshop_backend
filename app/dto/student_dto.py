@@ -9,6 +9,7 @@ class StudentDTO(BaseModel):
     age: Optional[int]
     phone_num: Optional[str]
     address: Optional[str]
+    studentId: Optional[str]
     school_id: Optional[str]
     class_id: Optional[str]
     course_id: Optional[List[str]] = Field(default_factory=list)
@@ -21,19 +22,25 @@ class StudentDTO(BaseModel):
         age: Optional[int] = Form(None),
         phone_num: Optional[str] = Form(None),
         address: Optional[str] = Form(None),
+        studentId: Optional[str] = Form(None),
         school_id: Optional[str] = Form(None),
         class_id: Optional[str] = Form(None),
-        course_id: Optional[List[str]] = Form([]),
-        profile_picture: Optional[UploadFile] = File(None)
+        profile_picture: Optional[UploadFile] = File(None),
+        course_id: Optional[str] = Form([])
     ):
+        if course_id:
+            course_id_list = course_id.split(",")
+        else:
+            course_id_list = []
         return cls(
             student_name=student_name,
             age=age,
             phone_num=phone_num,
             address=address,
+            studentId= studentId,
             school_id=school_id,
             class_id=class_id,
-            course_id=course_id,
+            course_id=course_id_list,
             profile_picture=profile_picture
         )
 
@@ -48,7 +55,8 @@ class StudentResponseDTO(BaseModel):
     student_name: Optional[str] = None
     age: Optional[int] = None
     phone_num: Optional[str] = None
-    student_email: Optional[str] = None
+    # student_email: Optional[str] = None
+    studentId: Optional[str] = None
     address: Optional[str] = None
     school_id: Optional[str] = None
     class_id: Optional[str] = None

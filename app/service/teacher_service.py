@@ -1,6 +1,7 @@
 import asyncio
 import configparser
 import uuid
+from bson import ObjectId
 from fastapi import HTTPException
 from app.repositories.teacher_repo import TeacherRepository
 from app.service.class_service import ClassService
@@ -15,16 +16,20 @@ config.read('config.ini')
 class TeacherService:
     @staticmethod
     async def create_teacher(teacherdto: TeacherDTO):
-        # Generate filename
-        file_name = await TeacherService.create_filename(teacherdto.name, teacherdto.profile_picture.filename)
+        file_name = None
+        
+        # Check if profile picture is provided
+        if teacherdto.profile_picture:
+            # Generate filename
+            file_name = await TeacherService.create_filename(teacherdto.name, teacherdto.profile_picture.filename)
 
-        folder = config['aws'][f'aws_s3_image_path']
-        file_path = f"{folder}/{file_name}"
-        file = teacherdto.profile_picture
-        file_content = await file.read()
+            folder = config['aws'][f'aws_s3_image_path']
+            file_path = f"{folder}/{file_name}"
+            file = teacherdto.profile_picture
+            file_content = await file.read()
 
-        # Upload File
-        asyncio.create_task(FileService.upload_to_s3(file_content,file_path))
+            # Upload file asynchronously
+            asyncio.create_task(FileService.upload_to_s3(file_content, file_path))
 
         teacher_data = teacherdto.dict(exclude_unset=True, exclude = {'profile_picture'})
         teacher=Teacher(**teacher_data)
@@ -33,9 +38,12 @@ class TeacherService:
         # Password hashing
         teacher.password = get_password_hash(teacher.password)
         result = await TeacherRepository.create_teacher(teacher)
-        if result: 
+        
+        if result:
             return "Teacher Created Successfully"
+        
         raise HTTPException(status_code=400, detail="Could not create teacher")
+
     
     @staticmethod
     async def create_filename(teacher_name: str, original_file_name: str) -> str:
@@ -116,23 +124,14 @@ class TeacherService:
             )
     
     @staticmethod
-    async def update_teacher(teacher_id: str, teacher_dto: TeacherDTO):
+    async def update_teacher(teacher_id: str, teacher_dto: dict):
         try:
-            teacher = Teacher(**teacher_dto.dict())
-            result = await TeacherRepository.update_teacher(teacher_id, teacher)
+            _id = ObjectId(teacher_id)
+            result = await TeacherRepository.update_teacher(_id, teacher_dto)
             
-            if isinstance(result, str):
-                # If result is a string, it's a message from the repository
-                return result
-            else:
-                # If result is not a string, it should be an UpdateResult object
-                if result.matched_count == 0:
-                    raise HTTPException(status_code=404, detail="Teacher not found")
-                
-                if result.modified_count > 0:
-                    return "Teacher updated successfully"
-                else:
-                    return "No changes made to the teacher"
+            if not result:
+                raise HTTPException(status_code=404, detail="Teacher not found")
+            return result
 
         except Exception as e:
             # For any other unexpected errors

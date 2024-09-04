@@ -40,14 +40,25 @@ class TeacherRepository:
             raise HTTPException(status_code=500, detail=f"An error occurred while deleting the teacher: {str(e)}")
         
     @staticmethod
-    async def update_teacher(teacher_id: str, teacher: Teacher):
+    async def update_teacher(teacher_id: ObjectId, teacher: Teacher):
         try:
-            _id = ObjectId(teacher_id)
+            existing_teacher = await mongodb.collections["teacher"].find_one({"_id":teacher_id})
+            if not existing_teacher:
+                raise HTTPException(status_code=404, detail="Teacher not found")
+            
+            update_data ={}
+
+            for key, value in teacher.items():
+                if value is not None:
+                    update_data[key] = value
+
             result = await mongodb.collections["teacher"].update_one(
-                {"_id": _id},
-                {"$set": teacher.dict(exclude_unset=True)}
+                {"_id": teacher_id},
+                {"$set": teacher}
             )
-            return result
+
+            if result.modified_count:
+                return "Teacher Updated Successfully"
             
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"An error occurred while updating the teacher: {str(e)}")
