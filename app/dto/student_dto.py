@@ -26,7 +26,7 @@ class StudentDTO(BaseModel):
         school_id: Optional[str] = Form(None),
         class_id: Optional[str] = Form(None),
         profile_picture: Optional[UploadFile] = File(None),
-        course_id: Optional[str] = Form(None)
+        course_id: Optional[str] = Form([])
     ):
         if course_id:
             course_id_list = course_id.split(",")

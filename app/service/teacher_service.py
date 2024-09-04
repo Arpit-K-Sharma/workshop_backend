@@ -1,6 +1,7 @@
 import asyncio
 import configparser
 import uuid
+from bson import ObjectId
 from fastapi import HTTPException
 from app.repositories.teacher_repo import TeacherRepository
 from app.service.class_service import ClassService
@@ -125,23 +126,14 @@ class TeacherService:
             )
     
     @staticmethod
-    async def update_teacher(teacher_id: str, teacher_dto: TeacherDTO):
+    async def update_teacher(teacher_id: str, teacher_dto: dict):
         try:
-            teacher = Teacher(**teacher_dto.dict())
-            result = await TeacherRepository.update_teacher(teacher_id, teacher)
+            _id = ObjectId(teacher_id)
+            result = await TeacherRepository.update_teacher(_id, teacher_dto)
             
-            if isinstance(result, str):
-                # If result is a string, it's a message from the repository
-                return result
-            else:
-                # If result is not a string, it should be an UpdateResult object
-                if result.matched_count == 0:
-                    raise HTTPException(status_code=404, detail="Teacher not found")
-                
-                if result.modified_count > 0:
-                    return "Teacher updated successfully"
-                else:
-                    return "No changes made to the teacher"
+            if not result:
+                raise HTTPException(status_code=404, detail="Teacher not found")
+            return result
 
         except Exception as e:
             # For any other unexpected errors

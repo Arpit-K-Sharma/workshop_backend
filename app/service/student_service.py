@@ -151,11 +151,10 @@ class StudentService:
             raise HTTPException(status_code=500,detail=f"An error occurred while deleting the student: {str(e)}")
 
     @staticmethod
-    async def update_student(student_id: str, studentdto: StudentDTO):
+    async def update_student(student_id: str, studentdto: dict):
         try:
             _id = ObjectId(student_id)
-            student = Student(**studentdto.dict())
-            result = await StudentRepository.update_student(_id, student)
+            result = await StudentRepository.update_student(_id, studentdto)
             if not result:
                 raise HTTPException(status_code=404, detail="Student not found")
             return result
