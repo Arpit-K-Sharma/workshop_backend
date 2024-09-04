@@ -32,9 +32,9 @@ class AuthService:
     
     
     async def student_login(email:str, password:str):
-        student = await mongodb.collections['student'].find_one({"student_email":email})
+        student = await mongodb.collections['student'].find_one({"studentId":email})
         id = str(student['_id'])
-        if student and email == student['student_email'] and password == student['password']:
+        if student and email == student['studentId'] and password == student['password']:
             access_token = create_access_token(data={"email":email,"id":id, "role":"STUDENT"})
             return {"access_token":access_token, "token_type": "bearer"}
         raise HTTPException(status_code=400, detail="Invalid credentials")

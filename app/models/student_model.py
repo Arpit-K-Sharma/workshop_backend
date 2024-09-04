@@ -8,7 +8,8 @@ class Student(BaseModel):
     student_name: Optional[str] = None
     age: Optional[int] = None
     phone_num: Optional[str] = None
-    student_email: Optional[str] = None
+    # student_email: Optional[str] = None
+    studentId: Optional[str] = None
     password: Optional[str] = None
     address: Optional[str] = None
     school_id: Optional[DBRef] = None
