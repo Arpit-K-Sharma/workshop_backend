@@ -3,6 +3,7 @@ from app.config.db_config import mongodb
 from bson import DBRef, ObjectId
 from app.models.student_model import Student
 from app.dto.student_dto import StudentDTO,StudentResponseDTO
+from app.utils.password_utils import get_password_hash
 
 class StudentRepository:
     @staticmethod
@@ -85,3 +86,15 @@ class StudentRepository:
             return student
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"An error occurred while fetching the students: {str(e)}")
+        
+    @staticmethod
+    async def change_password(student_id:str, new_password: str):
+        try:
+            new_password_hashed = get_password_hash(new_password)
+            result = await mongodb.collections["student"].update_one(
+                {"_id": ObjectId(student_id)},
+                {"$set": {"password": new_password_hashed, "is_password_changed": True}}
+            )            
+            return result
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"An error occurred while updating the password:  {str(e)}")

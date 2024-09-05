@@ -16,6 +16,7 @@ class Student(BaseModel):
     class_id: Optional[DBRef] = None
     course_id: Optional[List[DBRef]] = Field(default_factory=list)
     profile_picture: Optional[str] = None
+    is_password_changed: Optional[bool] = False
 
     @validator('school_id', pre=True, always=True)
     def convert_school_id(cls, v):

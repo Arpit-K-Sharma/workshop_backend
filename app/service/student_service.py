@@ -20,6 +20,7 @@ class StudentService:
         from app.service.school_service import SchoolService
         # Get the school
         school = await SchoolRepository.get_school(school_id)
+        print(school)
         if not school:
             raise HTTPException(status_code=404, detail="School not found")
         
@@ -170,6 +171,16 @@ class StudentService:
             if result:
                 return StudentResponseDTO(**result)
             raise HTTPException(status_code=404, detail="Student not found")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"An error occurred while fetching the student: {str(e)}")
+        
+    @staticmethod
+    async def change_password(student_id:str, new_password:str):
+        try:
+            result = await StudentRepository.change_password(student_id,new_password)
+            if result:
+                return result
+            raise HTTPException(status_code=500, detail=f"An error occurred while updating the password: {str(e)}")
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"An error occurred while fetching the student: {str(e)}")
         
