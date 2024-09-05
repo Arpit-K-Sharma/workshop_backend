@@ -16,7 +16,7 @@ async def add_class(class_dto: ClassDTO):
     return get_response(status="success", status_code=201, message=response)
 
 @class_route.put("/class/{class_id}")
-async def update_class(class_id: str, class_dto: dict):
+async def update_class(class_id: str, class_dto: ClassDTO):
     logger.info(f"ENDPOINT CALLED: /CLASS/{class_id} (PUT)\n DATA SENT: {class_dto.dict()}")
     response = await ClassService.update_class(class_id, class_dto)
     logger.info(f"RESPONSE SENT: {response}")

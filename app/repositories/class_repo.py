@@ -13,27 +13,15 @@ class ClassRepository:
         return {"inserted_id": str(result.inserted_id)}
 
     @staticmethod
-    async def update_class(class_id: ObjectId, class_instance: dict):
+    async def update_class(class_id: str, class_instance: Class):
         try:
-            existing_class = await mongodb.collections["class"].find_one({"_id": class_id})
-            if not existing_class:
-                raise HTTPException(status_code=404, detail="Class not found")
-            
-            update_data ={}
-            for key, value in class_instance.items():
-                if value is not None:
-                    update_data[key] = value
-
-            result = await mongodb.collections["class"].update_one(
-                {"_id": class_id},
-                {"$set": update_data})
-            
-            if result.modified_count > 0:
-                return "Class updated successfully"
-            
+            _id = ObjectId(class_id)
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Invalid class ID: {str(e)}")
         
+        result = await mongodb.collections["class"].update_one({"_id": _id}, {"$set": class_instance.dict(exclude_unset=True)})
+        if result.modified_count > 0:
+            return "Class updated successfully"
         else:
             raise HTTPException(status_code=404, detail="Class not found or no changes made")
 
@@ -121,12 +109,12 @@ class ClassRepository:
                 raise HTTPException(status_code=404, detail="Class not found")
 
             # Delete associated students
-            students_result = await mongodb.collections["student"].delete_many({"class_id": class_ref})
+            students_result = await mongodb.collections["student"].delete_many({"class_id": class_id})
 
             # Update teachers by removing this class from their schools.classes list
             teachers_result = await mongodb.collections["teacher"].update_many(
-                {"schools.classes": class_id},
-                {"$pull": {"schools.$[].classes": class_id}}
+                {"schools.classes": class_ref},
+                {"$pull": {"schools.$[].classes": class_ref}}
             )
 
             return {

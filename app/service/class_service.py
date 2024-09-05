@@ -1,5 +1,4 @@
 # app/service/class_service.py
-from bson import ObjectId
 from fastapi import HTTPException
 from app.dto.course_dto import CourseResponseDTO
 from app.dto.school_dto import SchoolResponseDTO
@@ -19,18 +18,15 @@ class ClassService:
         raise HTTPException(status_code=400, detail="Class is not added")
 
     @staticmethod
-    async def update_class(class_id: str, class_dto: dict):
-        try:
-            _id = ObjectId(class_id)
-            result = await ClassRepository.update_class(_id, class_dto)
-            if result is None:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Class with id {class_id} not found"
-                )
-            return result
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"An error occurred while updating the student: {str(e)}")
+    async def update_class(class_id: str, class_dto: ClassDTO):
+        class_instance = Class(**class_dto.dict())
+        result = await ClassRepository.update_class(class_id, class_instance)
+        if result is None:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Class with id {class_id} not found"
+            )
+        return result
 
     @staticmethod
     async def get_class_by_school_id(school_id: str):
