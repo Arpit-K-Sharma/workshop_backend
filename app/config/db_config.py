@@ -19,6 +19,6 @@ class MongoDB:
 
 # MongoDB connection details
 MONGO_URI = 'mongodb+srv://Sarpit07:Sarpit07@cluster.nvjypyg.mongodb.net/'
-DATABASE_NAME = 'SCHOOL_PROD'
+DATABASE_NAME = 'TEST'
 
 mongodb = MongoDB()

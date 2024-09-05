@@ -90,7 +90,7 @@ class StudentService:
             
             # Manually set the profile_picture field
             student.profile_picture = file_name
-            student.student_email = unique_email
+            # student.student_email = unique_email
 
             # Password hashing
             student.password = get_password_hash(school_code)
@@ -147,7 +147,7 @@ class StudentService:
     async def delete_student(student_id: str):
         try:
             result = await StudentRepository.delete_student(student_id)
-            return {"message": result}
+            return student_id
         except Exception as e:
             raise HTTPException(status_code=500,detail=f"An error occurred while deleting the student: {str(e)}")
 

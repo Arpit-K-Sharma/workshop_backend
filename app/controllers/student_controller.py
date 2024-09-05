@@ -33,6 +33,7 @@ async def get_all_Students():
 
 @student_route.post("/student")
 async def create_student(student: StudentDTO = Depends(StudentDTO.as_form)):
+    print(student)
     logger.info(f"ENDPOINT CALLED:/STUDENT/(POST)\n DATA RECEIVED")
     response = await StudentService.create_student(student)
     logger.info(f"RESPONSE SENT:{response}")
