@@ -20,7 +20,6 @@ class StudentService:
         from app.service.school_service import SchoolService
         # Get the school
         school = await SchoolRepository.get_school(school_id)
-        print(school)
         if not school:
             raise HTTPException(status_code=404, detail="School not found")
         
@@ -91,7 +90,7 @@ class StudentService:
             
             # Manually set the profile_picture field
             student.profile_picture = file_name
-            student.student_email = unique_email
+            # student.student_email = unique_email
 
             # Password hashing
             student.password = get_password_hash(school_code)

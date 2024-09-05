@@ -33,6 +33,7 @@ async def get_all_Students():
 
 @student_route.post("/student")
 async def create_student(student: StudentDTO = Depends(StudentDTO.as_form)):
+    print(student)
     logger.info(f"ENDPOINT CALLED:/STUDENT/(POST)\n DATA RECEIVED")
     response = await StudentService.create_student(student)
     logger.info(f"RESPONSE SENT:{response}")
@@ -60,7 +61,7 @@ async def get_student_by_email(email: str):
     logger.info(f"RESPONSE SENT:{response}")
     return get_response(status="success",status_code=200,data=response)
 
-@student_route.put("student/changePassword/{student_id}")
+@student_route.put("/student/changePassword/{student_id}")
 async def change_password(student_id:str, new_password: str):
     logger.info(f"ENDPOINT CALLED:/STUDENT/CHANGEPASSWORD/{student_id}(PUT)\n DATA TAKEN")
     response = await StudentService.change_password(student_id,new_password)
