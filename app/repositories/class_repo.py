@@ -109,12 +109,12 @@ class ClassRepository:
                 raise HTTPException(status_code=404, detail="Class not found")
 
             # Delete associated students
-            students_result = await mongodb.collections["student"].delete_many({"class_id": class_id})
+            students_result = await mongodb.collections["student"].delete_many({"class_id": class_ref})
 
             # Update teachers by removing this class from their schools.classes list
             teachers_result = await mongodb.collections["teacher"].update_many(
-                {"schools.classes": class_ref},
-                {"$pull": {"schools.$[].classes": class_ref}}
+                {"schools.classes": class_id},
+                {"$pull": {"schools.$[].classes": class_id}}
             )
 
             return {
