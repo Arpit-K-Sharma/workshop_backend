@@ -95,6 +95,6 @@ class StudentRepository:
                 {"_id": ObjectId(student_id)},
                 {"$set": {"password": new_password_hashed, "is_password_changed": True}}
             )            
-            return result
+            return True
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"An error occurred while updating the password:  {str(e)}")

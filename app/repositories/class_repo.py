@@ -13,15 +13,27 @@ class ClassRepository:
         return {"inserted_id": str(result.inserted_id)}
 
     @staticmethod
-    async def update_class(class_id: str, class_instance: Class):
+    async def update_class(class_id: ObjectId, class_instance: dict):
         try:
-            _id = ObjectId(class_id)
+            existing_class = await mongodb.collections["class"].find_one({"_id": class_id})
+            if not existing_class:
+                raise HTTPException(status_code=404, detail="Class not found")
+            
+            update_data ={}
+            for key, value in class_instance.items():
+                if value is not None:
+                    update_data[key] = value
+
+            result = await mongodb.collections["class"].update_one(
+                {"_id": class_id},
+                {"$set": update_data})
+            
+            if result.modified_count > 0:
+                return "Class updated successfully"
+            
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Invalid class ID: {str(e)}")
         
-        result = await mongodb.collections["class"].update_one({"_id": _id}, {"$set": class_instance.dict(exclude_unset=True)})
-        if result.modified_count > 0:
-            return "Class updated successfully"
         else:
             raise HTTPException(status_code=404, detail="Class not found or no changes made")
 
