@@ -5,6 +5,7 @@ class MongoDB:
         self.client = None
         self.database = None
         self.collections = {}
+        
 
     async def connect(self, uri: str, db_name: str):
         self.client = motor.motor_asyncio.AsyncIOMotorClient(uri)   
@@ -12,6 +13,7 @@ class MongoDB:
         collection_names = ['admin', 'course', 'teacher', 'event', 'student', 'attendance', 'hof', 'feedback','school','class','calendar','assignment','journal','missing_journals']
         self.collections = {name: self.database[name] for name in collection_names}
         print("MongoDB connected")
+
 
     async def close(self):
         self.client.close()
