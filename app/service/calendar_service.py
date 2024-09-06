@@ -214,7 +214,7 @@ class CalendarService:
                     days = []
                     for day in month_data.get('days', []):
                         events = [EventTitleDTOResponse(
-                             id = event.get('_id'),
+                            id = event.get('_id'),
                             event_name=event.get('event_name'),
                             event_description=event.get('event_description')
                         ) for event in day.get('events', [])]

@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, validator
 class FeedbackDTO(BaseModel):
     feedback_by: str
     feedback_for: str
+    feedback_title: str
     rating: int
     feedback_date: str
     feedback_description: str
@@ -21,6 +22,7 @@ class FeedbackResponseDTO(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")
     feedback_by: str
     feedback_for: str
+    feedback_title: str
     rating: int
     feedback_date: str
     feedback_description: str

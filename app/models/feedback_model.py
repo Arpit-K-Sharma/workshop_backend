@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, validator
 class Feedback(BaseModel):
     feedback_by: DBRef
     feedback_for: DBRef
+    feedback_title: str
     rating: int
     feedback_date: str
     feedback_description: str
