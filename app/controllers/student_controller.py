@@ -96,6 +96,6 @@ async def change_password(student_id:str, new_password: str):
     logger.info(f"ENDPOINT CALLED:/STUDENT/CHANGEPASSWORD/{student_id}(PUT)\n DATA TAKEN")
     response = await StudentService.change_password(student_id,new_password)
     logger.info(f"PASSWORD CHANGED SUCCESSFULLY FOR {student_id}")
-    return get_response(status="success",status_code=200,message="Password Changed Successfully")
+    return get_response(status="success",status_code=200,message=response)
 
-        
+
