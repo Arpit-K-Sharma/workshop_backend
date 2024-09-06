@@ -62,6 +62,7 @@ class StudentResponseDTO(BaseModel):
     class_id: Optional[str] = None
     course_id: Optional[List[str]] = Field(default_factory=list)
     profile_picture: Optional[str] = None
+    profile_picture_content: Optional[bytes] = None
     is_password_changed: Optional[bool] = False
 
     @validator('id', pre=True, always=True)

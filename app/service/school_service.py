@@ -69,7 +69,6 @@ class SchoolService:
 
         # Create a dict of the new data, excluding None values
         update_data = {k: v for k, v in schooldto.dict(exclude_unset=True).items() if v is not None}
-        print(update_data)
 
         updated_school = School(**update_data)
         result = await SchoolRepository.update_school(school_id, updated_school)

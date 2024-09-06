@@ -76,6 +76,7 @@ class TeacherResponseDTO(BaseModel):
     username: Optional[str] = None
     phone_num: Optional[str] = None
     profile_picture: Optional[str] = None
+    profile_picture_content: Optional[bytes] = None
     schools: Optional[List[SchoolInfoResponseDTO]] = Field(default_factory=list)
 
     class Config:

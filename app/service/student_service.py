@@ -1,6 +1,7 @@
 import asyncio
 import configparser
 import random
+from typing import List
 import uuid
 from bson import ObjectId
 from fastapi import HTTPException
@@ -182,5 +183,15 @@ class StudentService:
             raise HTTPException(status_code=500, detail=f"An error occurred while updating the password: {str(e)}")
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"An error occurred while fetching the student: {str(e)}")
+        
+    @staticmethod
+    async def download_profile_pictures(students: List[StudentResponseDTO]) -> List[dict]:
+        tasks = []
+        for student in students:
+            if student.profile_picture:
+                file_path = f"{config['aws']['aws_s3_image_path']}/{student.profile_picture}"
+                tasks.append(FileService.download_from_s3(file_path))
+        return await asyncio.gather(*tasks)
+
         
         

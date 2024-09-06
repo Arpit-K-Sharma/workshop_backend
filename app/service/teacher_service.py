@@ -1,5 +1,6 @@
 import asyncio
 import configparser
+from typing import List
 import uuid
 from bson import ObjectId
 from fastapi import HTTPException
@@ -136,3 +137,12 @@ class TeacherService:
         except Exception as e:
             # For any other unexpected errors
             raise HTTPException(status_code=500,detail=f"An error occurred while updating the teacher: {str(e)}")
+        
+    @staticmethod
+    async def download_profile_pictures(teachers: List[TeacherResponseDTO]) -> List[dict]:
+        tasks = []
+        for teacher in teachers:
+            if teacher.profile_picture:
+                file_path = f"{config['aws']['aws_s3_image_path']}/{teacher.profile_picture}"
+                tasks.append(FileService.download_from_s3(file_path))
+        return await asyncio.gather(*tasks)
