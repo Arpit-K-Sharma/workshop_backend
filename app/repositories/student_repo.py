@@ -16,7 +16,6 @@ class StudentRepository:
         try:
             _id = ObjectId(student_id)
             result = await mongodb.collections["student"].find_one({"_id": _id})
-            print(result)
             if result is None:
                 raise HTTPException(status_code=404, detail="Student not found")
             return result
