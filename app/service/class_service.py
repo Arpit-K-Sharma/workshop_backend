@@ -1,4 +1,5 @@
 # app/service/class_service.py
+import base64
 from fastapi import HTTPException
 from app.dto.course_dto import CourseResponseDTO
 from app.dto.school_dto import SchoolResponseDTO
@@ -7,6 +8,7 @@ from app.dto.teacher_dto import TeacherResponseDTO
 from app.repositories.class_repo import ClassRepository
 from app.models.class_model import Class
 from app.dto.class_dto import ClassDTO, ClassResponseDTO
+from app.service.student_service import StudentService
 
 class ClassService:
     @staticmethod
@@ -37,7 +39,7 @@ class ClassService:
     @staticmethod
     async def get_class_by_class_id(class_id: str):
         result = await ClassRepository.get_class_by_class_id(class_id)
-        return ClassResponseDTO(
+        class_response_dto =  ClassResponseDTO(
             id=str(result['_id']),
             class_name=result['class_name'],
             students=[StudentResponseDTO(**student) for student in result['students']],
@@ -45,6 +47,35 @@ class ClassService:
             courses=[CourseResponseDTO(**course) for course in result['courses']],
             school_id=result['school_id']
         )
+        students = class_response_dto.students
+
+        profile_pictures = await StudentService.download_profile_pictures(students)
+
+        students_with_pp = []
+    
+        # Iterate over each student
+        for student in students:
+            student_data = student.dict()  # Convert Pydantic model to dictionary
+
+            # Check if the student has a profile_picture field
+            if student.profile_picture:
+                # Extract the profile picture file name
+                profile_picture_filename = student.profile_picture
+                
+                # Find the profile picture content from the profile_pictures list
+                profile_picture_content = next(
+                    (pic[profile_picture_filename] for pic in profile_pictures if profile_picture_filename in pic), None
+                )
+
+                # If the profile picture content is found, encode it as Base64 and add it to the student data
+                if profile_picture_content:
+                    student_data['profile_picture_content'] = base64.b64encode(profile_picture_content).decode('utf-8')
+
+            # Append the student data to the response list
+            students_with_pp.append(student_data)
+        
+        class_response_dto.students = students_with_pp
+        return class_response_dto
     
     @staticmethod
     async def delete_class(class_id: str):
