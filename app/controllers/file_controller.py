@@ -1,6 +1,7 @@
 import base64
 import configparser
 import io
+import mimetypes
 from fastapi import APIRouter, HTTPException, Response, UploadFile, File
 from typing import List
 from fastapi.responses import StreamingResponse
@@ -37,17 +38,42 @@ async def download_file(filename: str):
     file_path = f"{folder}/{filename}"
     
     try:
+        # Try to download the file from S3
+        logger.info(f"Attempting to download file from S3: {file_path}")
         file_content = await FileService.download_from_s3(file_path)
+        
+        # Check if the file was retrieved successfully
         if not file_content:
+            logger.warning(f"File not found or 'file_name' missing in content: {file_path}")
             raise HTTPException(status_code=404, detail="File not found")
         
-        return Response(content=file_content, media_type="application/octet-stream", headers={"Content-Disposition": f"attachment; filename={filename}"})
+        # Get the actual file binary content, not just the name
+        # file_data = file_content["file_name"]  # Ensure this contains the binary data
+        
+        # Log the successful retrieval of file data
+        logger.info(f"File successfully retrieved: {filename}")
+
+        # Set content type based on the file extension
+        content_type, _ = mimetypes.guess_type(filename)
+        if not content_type:
+            content_type = "application/octet-stream"
+
+        # Return the file as a downloadable response
+        return Response(
+            content=file_content,  # Ensure this is binary data
+            media_type=content_type,
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    
     except HTTPException as he:
         logger.error(f"HTTPException during file download: {str(he)}")
         raise he
+    
     except Exception as e:
+        # Log unexpected errors
         logger.error(f"Unexpected error during file download: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Unexpected error during file download: {str(e)}")
+
 
 @file_route.post("/files/download")
 async def download_files(filenames: List[str]):
