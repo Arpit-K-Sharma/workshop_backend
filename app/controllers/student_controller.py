@@ -33,34 +33,33 @@ async def get_all_students():
     students = await StudentService.get_all_students()
     
     # Fetch profile pictures for these students (assuming it returns a list of dicts)
-    profile_pictures = await StudentService.download_profile_pictures(students)
+    # profile_pictures = await StudentService.download_profile_pictures(students)
 
-    response = []
+    # response = []
     
-    # Iterate over each student
-    for student in students:
-        student_data = student.dict()  # Convert Pydantic model to dictionary
+    # # Iterate over each student
+    # for student in students:
+    #     student_data = student.dict()  # Convert Pydantic model to dictionary
 
-        # Check if the student has a profile_picture field
-        if student.profile_picture:
-            # Extract the profile picture file name
-            profile_picture_filename = student.profile_picture
+    #     # Check if the student has a profile_picture field
+    #     if student.profile_picture:
+    #         # Extract the profile picture file name
+    #         profile_picture_filename = student.profile_picture
             
-            # Find the profile picture content from the profile_pictures list
-            profile_picture_content = next(
-                (pic[profile_picture_filename] for pic in profile_pictures if profile_picture_filename in pic), None
-            )
+    #         # Find the profile picture content from the profile_pictures list
+    #         profile_picture_content = next(
+    #             (pic[profile_picture_filename] for pic in profile_pictures if profile_picture_filename in pic), None
+    #         )
 
-            # If the profile picture content is found, encode it as Base64 and add it to the student data
-            if profile_picture_content:
-                student_data['profile_picture_content'] = base64.b64encode(profile_picture_content).decode('utf-8')
+    #         # If the profile picture content is found, encode it as Base64 and add it to the student data
+    #         if profile_picture_content:
+    #             student_data['profile_picture_content'] = base64.b64encode(profile_picture_content).decode('utf-8')
 
-        # Append the student data to the response list
-        response.append(student_data)
+    #     # Append the student data to the response list
+    #     response.append(student_data)
 
     logger.info(f"RESPONSE SENT SUCCESSFULLY")
-    return response
-
+    return get_response(status="success",status_code=200,data=students)
 @student_route.post("/student")
 async def create_student(student: StudentDTO = Depends(StudentDTO.as_form)):
     print(student)
