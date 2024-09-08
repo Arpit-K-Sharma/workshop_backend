@@ -4,9 +4,9 @@ from pydantic import BaseModel, Field, field_validator
 
 class Class(BaseModel):
     class_name: Optional[str] = None
-    students: Optional[List[DBRef]] = Field(default_factory=list)
-    teachers: Optional[List[DBRef]] = Field(default_factory=list)
-    courses: Optional[List[DBRef]] = Field(default_factory=list)
+    students: Optional[List[DBRef]] =  Field(default = None)
+    teachers: Optional[List[DBRef]] =  Field(default = None)
+    courses: Optional[List[DBRef]] =  Field(default = None)
     school_id: Optional[DBRef] = None
 
     @field_validator('students', 'teachers', 'courses', mode='before')

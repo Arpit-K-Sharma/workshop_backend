@@ -9,9 +9,9 @@ from app.dto.teacher_dto import TeacherResponseDTO
 class ClassDTO(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")
     class_name: str
-    students: Optional[List[str]] = Field(default_factory=list)
-    teachers: Optional[List[str]] = Field(default_factory=list)
-    courses: Optional[List[str]] = Field(default_factory=list)
+    students: Optional[List[str]] = Field(default = None)
+    teachers: Optional[List[str]] = Field(default = None)
+    courses: Optional[List[str]] = Field(default = None)
     school_id: Optional[str] = None
 
     class Config:
