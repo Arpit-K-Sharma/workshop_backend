@@ -19,11 +19,25 @@ class ClassRepository:
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Invalid class ID: {str(e)}")
         
-        result = await mongodb.collections["class"].update_one({"_id": _id}, {"$set": class_instance.dict(exclude_unset=True)})
-        if result.modified_count > 0:
-            return "Class updated successfully"
-        else:
-            raise HTTPException(status_code=404, detail="Class not found or no changes made")
+        # Create an update dictionary with only the fields that are set
+        update_data = {}
+        for key, value in class_instance.dict(exclude_unset=True).items():
+            if value is not None:
+                update_data[key] = value
+        
+        try:
+            result = await mongodb.collections["class"].update_one(
+                {"_id": _id},
+                {"$set": update_data}
+            )
+            
+            if result.modified_count > 0:
+                return "Class updated successfully"
+            else:
+                raise HTTPException(status_code=404, detail="Class not found or no changes made")
+        
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"An error occurred while updating the class: {str(e)}")
 
     @staticmethod
     async def get_class_by_school_id(school_id: str):
