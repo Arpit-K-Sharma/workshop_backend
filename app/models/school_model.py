@@ -9,7 +9,7 @@ class School(BaseModel):
     password: Optional[str] = None
     address: Optional[str] = None
     # banner: Optional[str] = None
-    # logo: Optional[str] = None
+    logo: Optional[str] = None
     school_code:Optional[str] = None
     course_id: Optional[List[DBRef]] = Field(default_factory=list)
 

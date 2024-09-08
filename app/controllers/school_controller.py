@@ -1,5 +1,5 @@
 from typing import Optional, Union
-from fastapi import APIRouter, BackgroundTasks, File, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, UploadFile
 from app.dto.school_dto import SchoolDTO
 from app.service.school_service import SchoolService
 from app.config.logger_config import get_logger
@@ -31,8 +31,8 @@ async def get_course_student_per_school():
 
 
 @school_route.post("/school")
-async def create_school(schooldto: SchoolDTO):
-    logger.info(f"ENDPOINT CALLED: /SCHOOL(POST)\n DATA SENT:{schooldto.dict()}")
+async def create_school(schooldto: SchoolDTO = Depends(SchoolDTO.as_form)):
+    logger.info(f"ENDPOINT CALLED: /SCHOOL(POST)\n DATA RECEIVED")
     response = await SchoolService.create_school(schooldto)
     logger.info("School creation task added to background tasks")
     return get_response(status="success", status_code=202, message="School creation successfully")
@@ -50,7 +50,6 @@ async def delete_school(school_id: str):
 
 @school_route.put("/school/{school_id}")
 async def update_school(school_id: str, schooldto: SchoolDTO):
-    print(schooldto)
     logger.info(f"ENDPOINT CALLED: /SCHOOL/{school_id} (PUT)\n DATA SENT: {schooldto.dict()}")
     response = await SchoolService.update_school(school_id, schooldto)
     logger.info(f"RESPONSE SENT: {response}")

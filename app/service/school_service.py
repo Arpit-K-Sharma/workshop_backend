@@ -1,37 +1,52 @@
+import asyncio
+import configparser
 import random
+import uuid
 from fastapi import HTTPException
 from app.repositories.school_repo import SchoolRepository
 from app.models.school_model import School
 from app.dto.school_dto import SchoolDTO, SchoolResponseDTO
 from app.service.course_service import CourseService
+from app.service.file_service import FileService
 from app.service.student_service import StudentService
 from app.utils.password_utils import get_password_hash
+
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 class SchoolService:
     @staticmethod
     async def create_school(schooldto: SchoolDTO):
-        # Convert SchoolDTO to School object
-        school = School(**schooldto.dict())
-
-        # # Upload banner file
-        # if banner is not None:
-        #     banner_result = await FileService.upload_file(banner)
-        #     school.banner = banner_result["file_id"]
-        
-        # # Upload logo file
-        # if logo is not None:
-        #     logo_result = await FileService.upload_file(logo)
-        #     school.logo = logo_result["file_id"]
-
-        school_name_abbr = SchoolService.abbreviate_school_name(school.school_name)
+        school_name_abbr = SchoolService.abbreviate_school_name(schooldto.school_name)
         random_numbers = ''.join([str(random.randint(0, 9)) for _ in range(4)])
         school_code = f"{school_name_abbr}{random_numbers}"
 
         # Add school code to the school object
-        school.school_code = school_code
+        schooldto.school_code = school_code
+
+        # Upload logo file
+        if schooldto.logo:
+            # Generate filename
+            file_name = await SchoolService.create_filename(schooldto.school_code, schooldto.logo.filename)
+
+            folder = config['aws'][f'aws_s3_image_path']
+            file_path = f"{folder}/{file_name}"
+            file = schooldto.logo
+            file_content = await file.read()
+
+            # Upload File
+            asyncio.create_task(FileService.upload_to_s3(file_content,file_path))
+
 
         # Password hashing
-        school.password = get_password_hash(school.password)
+        schooldto.password = get_password_hash(schooldto.password)
+        
+        # Convert StudentDTO to Student, excluding profile_picture
+        school_data = schooldto.dict(exclude_unset=True, exclude={'logo'})
+        school = School(**school_data)
+
+        # Setting the filename
+        school.logo = file_name
         
         # Create school
         result = await SchoolRepository.create_school(school)
@@ -39,6 +54,21 @@ class SchoolService:
             return "School created successfully"
         raise HTTPException(status_code=400, detail="School not created")
 
+
+    @staticmethod
+    async def create_filename(school_code: str, original_file_name: str) -> str:
+        try:
+            # Generate a random 5-character UUID
+            random_uuid = str(uuid.uuid4())[:5]
+
+            # Extract the file extension from the original file name
+            file_extension = original_file_name.split('.')[-1]
+
+            # Create the unique filename
+            unique_filename = f"{school_code}_{random_uuid}.{file_extension}"
+            return unique_filename
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"An error occurred while generating the filename: {str(e)}")
     
     @staticmethod
     async def get_all_school():
