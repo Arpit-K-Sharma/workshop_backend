@@ -144,5 +144,5 @@ class TeacherService:
         for teacher in teachers:
             if teacher.profile_picture:
                 file_path = f"{config['aws']['aws_s3_image_path']}/{teacher.profile_picture}"
-                tasks.append(FileService.download_from_s3(file_path))
+                tasks.append(FileService.internal_download_from_s3(file_path))
         return await asyncio.gather(*tasks)

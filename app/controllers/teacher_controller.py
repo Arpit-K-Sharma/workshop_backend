@@ -19,6 +19,7 @@ async def get_all_teachers():
 
     # Fetch profile pictures for these teachers (assuming it returns a list of dicts)
     profile_pictures = await TeacherService.download_profile_pictures(teachers)
+    print(profile_pictures)
 
     response = []
 

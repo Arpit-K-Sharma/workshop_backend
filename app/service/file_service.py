@@ -73,6 +73,32 @@ class FileService:
             file_name = os.path.basename(file_path)
 
             logger.info(f"File downloaded successfully from S3: {file_path}")
+            return file_content
+        
+        except ClientError as e:
+            logger.error(f"Error during S3 download: {e}")
+            raise HTTPException(status_code=500, detail=f"Error during S3 download: {e}")
+        except Exception as e:
+            logger.error(f"Unexpected error during S3 download: {e}")
+            raise HTTPException(status_code=500, detail=f"Unexpected error during S3 download: {e}")
+        
+    @staticmethod
+    async def internal_download_from_s3(file_path: str) -> dict:
+        s3 = FileService.get_s3_client()
+        bucket_name = config["aws"]["aws_bucket_name"]
+        
+        if not bucket_name:
+            raise HTTPException(status_code=500, detail="AWS bucket name is not configured")
+
+        try:
+            # Get file from S3
+            file = s3.get_object(Bucket=bucket_name, Key=file_path)
+
+            # Read file content
+            file_content = file['Body'].read()
+            file_name = os.path.basename(file_path)
+
+            logger.info(f"File downloaded successfully from S3: {file_path}")
             return {file_name:file_content}
         except ClientError as e:
             logger.error(f"Error during S3 download: {e}")
