@@ -24,6 +24,8 @@ class ClassRepository:
         for key, value in class_instance.dict(exclude_unset=True).items():
             if value is not None:
                 update_data[key] = value
+
+        print(update_data)
         
         try:
             result = await mongodb.collections["class"].update_one(
@@ -84,24 +86,32 @@ class ClassRepository:
     
     @staticmethod
     async def get_students_from_refs(student_refs: List[DBRef]):
+        if not student_refs:
+            return []
         student_ids = [ObjectId(ref.id) for ref in student_refs]
         students = await mongodb.collections["student"].find({"_id": {"$in": student_ids}}).to_list(None)
         return students
 
+
     @staticmethod
     async def get_teachers_from_refs(teacher_refs: List[DBRef]):
+        if not teacher_refs:
+            return [];
         teacher_ids = [ObjectId(ref.id) for ref in teacher_refs]
         teachers = await mongodb.collections["teacher"].find({"_id": {"$in": teacher_ids}}).to_list(None)
         return teachers
 
     @staticmethod
     async def get_courses_from_refs(course_refs: List[DBRef]):
+        if not course_refs:
+            return []
         course_ids = [ObjectId(ref.id) for ref in course_refs]
         courses = await mongodb.collections["course"].find({"_id": {"$in": course_ids}}).to_list(None)
         return courses
 
     @staticmethod
     async def get_school_from_ref(school_ref: DBRef):
+        
         return await mongodb.collections["school"].find_one({"_id": ObjectId(school_ref.id)})
     
 
